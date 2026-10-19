@@ -1,0 +1,13 @@
+# Dependências Node.js em qualquer subprojeto
+node_modules/
+
+# Configurações locais e segredos
+.env
+.env.*
+!.env.example
+
+# Arquivos gerados e do sistema operacional
+coverage/
+dist/
+.DS_Store
+npm-debug.log*
