@@ -1,0 +1,64 @@
+@base = http://localhost:3333/api
+@token = token-simulado
+@ocorrenciaId = 7a2e9c44-51b3-4f6e-8c2d-0e3f6a1b9d55
+@alunoId = 0f5c3b1e-8d7a-4f0a-9d7e-2a6c1b9e4a10
+
+### R01 - health
+GET {{base}}/health
+
+### R02 - login (resposta simulada; guarde o token retornado na variável @token)
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "matricula": "2026000001", "senha": "senha123" }
+
+### R03 - usuário autenticado (resposta simulada)
+GET {{base}}/auth/me
+Authorization: Bearer {{token}}
+
+### R04 - registrar ocorrência
+POST {{base}}/ocorrencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "alunoId": "{{alunoId}}",
+  "tipo": "uso_indevido_celular",
+  "gravidade": "leve",
+  "descricao": "Utilizou o celular durante a aula.",
+  "data": "2026-05-12"
+}
+
+### R05 - listar ocorrências (ativas, filtro por gravidade)
+GET {{base}}/ocorrencias?situacao=ativas&gravidade=leve&page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### R06 - detalhar ocorrência
+GET {{base}}/ocorrencias/{{ocorrenciaId}}
+Authorization: Bearer {{token}}
+
+### R07 - arquivar ocorrência
+POST {{base}}/ocorrencias/{{ocorrenciaId}}/arquivamento
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "motivo": "Registro lançado no aluno errado." }
+
+### R08 - tentativa de editar (deve retornar 405)
+PATCH {{base}}/ocorrencias/{{ocorrenciaId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "descricao": "tentando alterar" }
+
+### R08 - tentativa de excluir (deve retornar 405)
+DELETE {{base}}/ocorrencias/{{ocorrenciaId}}
+Authorization: Bearer {{token}}
+
+### R09 - histórico de ocorrências de um aluno
+GET {{base}}/alunos/{{alunoId}}/ocorrencias
+Authorization: Bearer {{token}}
+
+### R10 - meu histórico (perfil aluno)
+GET {{base}}/me/ocorrencias
+Authorization: Bearer {{token}}
