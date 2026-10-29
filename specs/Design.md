@@ -110,13 +110,14 @@ O módulo deve permitir que a instituição registre, consulte, filtre, proteja 
 | Coordenador | Visualiza todas as ocorrências, cadastra turmas/alunos e gerencia vínculos | Nenhuma para o módulo |
 | Professor | Registra e arquiva ocorrências para turmas vinculadas | Não pode agir fora das turmas em que leciona |
 | Aluno | Consulta o próprio histórico | Não pode registrar/arquivar |
+| Apoio pedagógico (adicionado em 28/10/2026) | Visualiza tudo que o coordenador visualiza (ocorrências, alunos, turmas, professores, painel) — sem restrição de turma | Nunca registra, arquiva ou cadastra — perfil **somente leitura**, em nenhuma rota de escrita |
 
 ### 1.4 Regras de negócio centrais
 
 - **RN1:** ocorrências são imutáveis em termos de conteúdo; a única ação permitida é arquivamento.
 - **RN3:** professor só pode registrar dentro das turmas em que atua.
 - **RN5:** a turma da ocorrência é registrada no momento do cadastro e nunca alterada.
-- **RNF1:** proteção na API e no banco (triggers de `DELETE` e `UPDATE`), com hooks do modelo como defesa adicional.
+- **RNF1:** proteção garantida pelos hooks do modelo Sequelize (`beforeUpdate`/`beforeDestroy` em `Ocorrencia`); sem trigger de banco (decisão de 26/10/2026, ver §3.6 e §8).
 - **RNF3:** autorização é validada no backend.
 
 ### 1.5 Escopo do design
@@ -255,25 +256,25 @@ ocorrencia-mais/
 | R02 | Núcleo        | POST   | `/api/auth/login`                     | público                                  | 5           |
 | R03 | Núcleo        | GET    | `/api/auth/me`                        | autenticado                              | 5           |
 | R04 | **Núcleo**    | **POST** | **`/api/ocorrencias`**              | professor\*, coordenador                 | **1**       |
-| R05 | Núcleo        | GET    | `/api/ocorrencias`                    | professor\*, coordenador                 | 2           |
-| R06 | Núcleo        | GET    | `/api/ocorrencias/:id`                | professor\*, coordenador, aluno\*\*      | 2, 4        |
+| R05 | Núcleo        | GET    | `/api/ocorrencias`                    | professor\*, coordenador, apoio_pedagogico\*\*\*  | 2           |
+| R06 | Núcleo        | GET    | `/api/ocorrencias/:id`                | professor\*, coordenador, aluno\*\*, apoio_pedagogico\*\*\* | 2, 4 |
 | R07 | Núcleo        | POST   | `/api/ocorrencias/:id/arquivamento`   | professor\*, coordenador                 | 3           |
 | R08 | Núcleo        | PUT/PATCH/DELETE | `/api/ocorrencias/:id`      | todos → sempre `405`                     | 1 (6–7)     |
-| R09 | Núcleo        | GET    | `/api/alunos/:id/ocorrencias`         | professor\*, coordenador, aluno\*\*      | 4           |
+| R09 | Núcleo        | GET    | `/api/alunos/:id/ocorrencias`         | professor\*, coordenador, aluno\*\*, apoio_pedagogico\*\*\* | 4 |
 | R10 | Núcleo        | GET    | `/api/me/ocorrencias`                 | aluno                                    | 4           |
-| R11 | Apoio         | GET    | `/api/turmas`                         | professor\*, coordenador                 | 2, 6        |
-| R12 | Apoio         | GET    | `/api/alunos`                         | professor\*, coordenador                 | 1, 6        |
-| R13 | Apoio         | GET    | `/api/alunos/:id`                     | professor\*, coordenador, aluno\*\*      | 4           |
+| R11 | Apoio         | GET    | `/api/turmas`                         | professor\*, coordenador, apoio_pedagogico\*\*\*  | 2, 6        |
+| R12 | Apoio         | GET    | `/api/alunos`                         | professor\*, coordenador, apoio_pedagogico\*\*\*  | 1, 6        |
+| R13 | Apoio         | GET    | `/api/alunos/:id`                     | professor\*, coordenador, aluno\*\*, apoio_pedagogico\*\*\* | 4 |
 | R14 | Apoio         | POST   | `/api/turmas`                         | coordenador                              | 6           |
 | R15 | Apoio         | POST   | `/api/alunos`                         | coordenador                              | 6           |
 | R16 | Apoio         | PATCH  | `/api/alunos/:id/turma`               | coordenador                              | 6           |
-| R17 | Apoio         | GET    | `/api/professores`                    | coordenador                              | 6           |
-| R18 | Apoio         | GET    | `/api/turmas/:id/professores`         | coordenador                              | 6           |
+| R17 | Apoio         | GET    | `/api/professores`                    | coordenador, apoio_pedagogico\*\*\*       | 6           |
+| R18 | Apoio         | GET    | `/api/turmas/:id/professores`         | coordenador, apoio_pedagogico\*\*\*       | 6           |
 | R19 | Apoio         | POST   | `/api/turmas/:id/professores`         | coordenador                              | 6           |
-| R20 | Complementar  | GET    | `/api/painel/turmas`                  | coordenador                              | 7           |
-| R21 | Complementar  | GET    | `/api/painel/alunos-em-atencao`       | coordenador                              | 7           |
+| R20 | Complementar  | GET    | `/api/painel/turmas`                  | coordenador, apoio_pedagogico\*\*\*       | 7           |
+| R21 | Complementar  | GET    | `/api/painel/alunos-em-atencao`       | coordenador, apoio_pedagogico\*\*\*       | 7           |
 
-\* professor: apenas turmas vinculadas (`403` caso contrário). \*\* aluno: apenas o próprio registro.
+\* professor: apenas turmas vinculadas (`403` caso contrário). \*\* aluno: apenas o próprio registro. \*\*\* apoio_pedagogico: mesmo alcance do coordenador (todas as turmas, sem restrição) **somente leitura** — nunca aparece em rota de escrita (`POST`/`PATCH`/`PUT`/`DELETE`); ver §1.3.
 
 ### 3.3 Detalhamento das rotas do núcleo
 
@@ -475,62 +476,15 @@ erDiagram
 
 | Tabela               | Colunas                                                                                                                                                                                                                                                  |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `usuarios`           | `id` UUID PK · `nome` · `matricula` **UNIQUE** · `senha_hash` · `perfil` ENUM(professor, coordenador, aluno)                                                                                                                                             |
-| `turmas`             | `id` UUID PK · `nome` **UNIQUE**                                                                                                                                                                                                                         |
-| `alunos`             | `id` UUID PK · `nome` · `matricula` **UNIQUE** · `turma_id` FK → turmas · `usuario_id` FK → usuarios (nullable)                                                                                                                                          |
+| `usuarios`           | `id` UUID PK · `nome` · `matricula` **UNIQUE** · `senha_hash` · `perfil` ENUM(professor, coordenador, aluno, apoio_pedagogico)                                                                                                                           |
+| `turmas`             | `id` UUID PK · `nome` **UNIQUE** · `numero` (nullable) · `observacoes` TEXT (nullable) · `etapa_ensino` ENUM(fundamental_1, fundamental_2, medio) (nullable) · `turno` ENUM(matutino, vespertino, noturno, integral) (nullable)                          |
+| `alunos`             | `id` UUID PK · `nome` · `matricula` **UNIQUE** · `turma_id` FK → turmas · `usuario_id` FK → usuarios (nullable) · `telefone` (nullable) · `email` (nullable) · `nome_responsavel` (nullable) · `telefone_responsavel` (nullable)                         |
 | `professores_turmas` | `professor_id` FK → usuarios · `turma_id` FK → turmas · **PK composta** (professor_id, turma_id)                                                                                                                                                         |
 | `ocorrencias`        | `id` UUID PK · `aluno_id` FK · **`turma_id` FK (turma no registro, imutável)** · `tipo` ENUM · `gravidade` ENUM · `descricao` VARCHAR(500) · `data_ocorrencia` DATE · `criado_por` FK · `criado_em` · `arquivada` BOOLEAN (padrão `false`) · `motivo_arquivamento` · `arquivado_por` FK · `arquivado_em` · `referencia_id` FK → ocorrencias (nullable) |
 
 **Índices:** `ocorrencias (aluno_id, data_ocorrencia DESC)` · `ocorrencias (turma_id, data_ocorrencia DESC)` · `ocorrencias (arquivada)` · `alunos (turma_id)`.
 
-**Reforço no banco (RNF1)** — migrations extras com **dois triggers** que impedem a exclusão física **e** a alteração do conteúdo mesmo fora da API (SQL direto). Primeiro, o de exclusão:
-
-```sql
-CREATE OR REPLACE FUNCTION bloquear_exclusao_ocorrencia() RETURNS trigger AS $$
-BEGIN
-  RAISE EXCEPTION 'Ocorrências não podem ser excluídas';
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_ocorrencias_sem_delete
-BEFORE DELETE ON ocorrencias
-FOR EACH ROW EXECUTE FUNCTION bloquear_exclusao_ocorrencia();
-```
-
-Segundo, o de alteração: só a transição ativa → arquivada é aceita (e o arquivamento é definitivo, sem "desarquivar"):
-
-```sql
-CREATE OR REPLACE FUNCTION bloquear_alteracao_ocorrencia() RETURNS trigger AS $$
-BEGIN
-  IF NEW.id IS DISTINCT FROM OLD.id
-     OR NEW.aluno_id IS DISTINCT FROM OLD.aluno_id
-     OR NEW.turma_id IS DISTINCT FROM OLD.turma_id
-     OR NEW.tipo IS DISTINCT FROM OLD.tipo
-     OR NEW.gravidade IS DISTINCT FROM OLD.gravidade
-     OR NEW.descricao IS DISTINCT FROM OLD.descricao
-     OR NEW.data_ocorrencia IS DISTINCT FROM OLD.data_ocorrencia
-     OR NEW.criado_por IS DISTINCT FROM OLD.criado_por
-     OR NEW.criado_em IS DISTINCT FROM OLD.criado_em
-     OR NEW.referencia_id IS DISTINCT FROM OLD.referencia_id THEN
-    RAISE EXCEPTION 'Ocorrências não podem ser alteradas';
-  END IF;
-
-  IF OLD.arquivada AND (
-       NEW.arquivada IS DISTINCT FROM OLD.arquivada
-    OR NEW.motivo_arquivamento IS DISTINCT FROM OLD.motivo_arquivamento
-    OR NEW.arquivado_por IS DISTINCT FROM OLD.arquivado_por
-    OR NEW.arquivado_em IS DISTINCT FROM OLD.arquivado_em) THEN
-    RAISE EXCEPTION 'Ocorrência arquivada não pode ser alterada';
-  END IF;
-
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_ocorrencias_sem_update
-BEFORE UPDATE ON ocorrencias
-FOR EACH ROW EXECUTE FUNCTION bloquear_alteracao_ocorrencia();
-```
+**Reforço de imutabilidade (RNF1):** decidido **não** usar triggers de banco (SQL) para este projeto — é complexidade desnecessária para o estágio e o escopo atuais. A garantia de que uma ocorrência não é excluída nem alterada (exceto a transição ativa → arquivada) fica **só na camada da aplicação**, pelos hooks do modelo `Ocorrencia` (`beforeUpdate`/`beforeDestroy`, ver §3.7). Isso cobre todo o caminho da API, desde que o código **nunca** use `Ocorrencia.update(...)`/`destroy(...)` em massa (que não disparam hooks de instância) — só `instancia.save()`. Como consequência aceita, um `UPDATE`/`DELETE` feito via SQL direto no banco (fora da aplicação) **não** é bloqueado; se isso se tornar um requisito real, a reintrodução dos triggers fica registrada aqui como ponto em aberto (ver §8).
 
 ### 3.7 Modelos Sequelize (referência)
 
@@ -580,7 +534,7 @@ module.exports = (sequelize) => {
 };
 ```
 
-> Os hooks valem para `instancia.save()`. Por isso o código **nunca** usa `Ocorrencia.update(...)`/`destroy(...)` em massa — e os triggers do banco (`DELETE` e `UPDATE`) cobrem qualquer exceção, inclusive SQL direto.
+> Os hooks valem para `instancia.save()`. Por isso o código **nunca** usa `Ocorrencia.update(...)`/`destroy(...)` em massa — é essa disciplina, e não um trigger de banco, que garante a imutabilidade neste projeto (ver a nota em §3.6).
 
 **`models/Aluno.js`** (os demais seguem o mesmo padrão):
 
@@ -1143,3 +1097,5 @@ Abas: **Alunos** (usa `AlunosPage`) · **Turmas** · **Vínculos**.
 1. Critério "em atenção" (3 graves ou 5 no total em 30 dias) — confirmar antes da fase 3.
 2. Senha inicial provisória do aluno: definida como igual à matrícula (apenas ambiente acadêmico); a troca de senha está fora do escopo (limitação conhecida).
 3. Uso de JavaScript (em vez de TypeScript) nos dois projetos.
+4. Imutabilidade de `ocorrencias` só via hooks do Sequelize, sem trigger de banco (decisão de 26/10/2026, registrada em `history/20261026_rotas_simuladas_tarefa_1.1.md`): `UPDATE`/`DELETE` feitos por SQL direto, fora da aplicação, não são bloqueados. Se isso passar a ser um requisito real (ex.: proteção contra erro humano com acesso direto ao banco), reavaliar a reintrodução dos triggers (SQL de referência ficou só no histórico do Git, removido do Design e do código em 26/10/2026).
+5. ~~Novo perfil `apoio_pedagogico`: permissões ainda não definidas.~~ **Resolvido em 28/10/2026:** mesmo alcance do coordenador (todas as turmas, sem restrição), mas **somente leitura** — nunca registra, arquiva ou cadastra. Já refletido em §1.3 e na coluna "Perfis" de §3.2 (rotas R05, R06, R09, R11, R12, R13, R17, R18, R20, R21). Fica para a Tarefa 1.3 (middlewares de autorização) implementar isso de fato: `autorizarPerfil` precisa aceitar uma lista de perfis **somente leitura** sem aplicar a restrição de turma (`podeAgirNaTurma`) que vale para o professor.

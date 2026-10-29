@@ -33,7 +33,7 @@
 
 ### FASE 1 — BACKEND (API Node.js + Express + PostgreSQL + Sequelize)
 
-- [ ] **1.1** Projeto Express + **rotas do núcleo testáveis** (respostas simuladas) + `api.http` — _P/M_ — **PRIMEIRA TAREFA**
+- [x] **1.1** Projeto Express + **rotas do núcleo testáveis** (respostas simuladas) + `api.http` — _P/M_ — **PRIMEIRA TAREFA**
 - [ ] **1.2** PostgreSQL + Sequelize: conexão, modelos, migrations, trigger e seeds — _M_
 - [ ] **1.3** Autenticação real e middlewares (R02, R03) — _M_
 - [ ] **1.4** **Registrar ocorrência** de verdade (R04) — _M_
@@ -100,7 +100,7 @@ flowchart LR
 
 # FASE 1 — BACKEND
 
-## Tarefa 1.1 — Projeto Express + rotas do núcleo testáveis  ⭐ PRIMEIRA TAREFA
+## Tarefa 1.1 — Projeto Express + rotas do núcleo testáveis  ⭐ PRIMEIRA TAREFA ✅ CONCLUÍDA
 
 **Objetivo:** ter uma API no ar em que **todas as rotas do núcleo já respondem** conforme o contrato do `Design.md` (seção 3), com dados simulados, e que possam ser testadas por uma ferramenta HTTP — antes de existir banco, regra de negócio ou tela.
 
@@ -240,9 +240,10 @@ module.exports = router;
 2. Configurar `.env` (modelo no Design §3.12), `config/database.js` e `.sequelizerc` apontando para `src/database/migrations` e `src/database/seeders`.
 3. Criar os modelos `Usuario`, `Turma`, `Aluno`, `ProfessorTurma` e `Ocorrencia` e as associações (modelos no Design §3.7; a `Ocorrencia` **com os hooks de imutabilidade**).
 4. Criar as migrations das 5 tabelas (UUID, ENUMs, FKs, `UNIQUE` em `usuarios.matricula`, `turmas.nome` e `alunos.matricula`, índices do Design §3.6).
-5. Criar as migrations dos **triggers** que bloqueiam `DELETE` e a alteração dos campos de conteúdo (`UPDATE`) em `ocorrencias` (SQL no design §3.6); só a transição ativa → arquivada é aceita.
-6. Criar os seeders (dados de desenvolvimento, abaixo). Eles usam senhas fracas e **não devem rodar em produção** (proteger com `NODE_ENV`).
-7. Atualizar `GET /api/health` para testar a conexão (`sequelize.authenticate()`).
+5. Criar os seeders (dados de desenvolvimento, abaixo). Eles usam senhas fracas e **não devem rodar em produção** (proteger com `NODE_ENV`).
+6. Atualizar `GET /api/health` para testar a conexão (`sequelize.authenticate()`).
+
+> Decisão (ver Design §3.6): sem triggers de banco nesta etapa — a imutabilidade de `ocorrencias` é garantida só pelos hooks do modelo Sequelize (`beforeUpdate`/`beforeDestroy`).
 
 **Código de referência**
 
@@ -302,10 +303,9 @@ npx sequelize-cli db:seed:all
 
 **Pronto quando**
 
-- [ ] `db:migrate` cria as 5 tabelas e os triggers sem erro; `db:migrate:undo:all` desfaz.
+- [ ] `db:migrate` cria as 5 tabelas sem erro; `db:migrate:undo:all` desfaz.
 - [ ] `db:seed:all` cria os dados acima.
-- [ ] Um `DELETE FROM ocorrencias` executado direto no banco **falha** com "Ocorrências não podem ser excluídas".
-- [ ] Um `UPDATE ocorrencias SET descricao = 'x'` executado direto no banco **falha** com "Ocorrências não podem ser alteradas".
+- [ ] Alterar uma ocorrência com `instancia.save()` fora dos campos de arquivamento lança `OCORRENCIA_IMUTAVEL`; `instancia.destroy()` lança `OCORRENCIA_NAO_PODE_SER_EXCLUIDA` (hooks do modelo, sem trigger de banco — ver Design §3.6).
 - [ ] `GET /api/health` mostra `"banco": "conectado"`.
 
 ---
@@ -481,7 +481,7 @@ async function login(req, res) {
 
 | Propriedade | Teste (Supertest)                                                                                   |
 | :---------: | --------------------------------------------------------------------------------------------------- |
-| P1          | `PATCH` e `DELETE` em ocorrência → `405`; `DELETE` e `UPDATE` de `descricao` por SQL direto → erro do trigger                      |
+| P1          | `PATCH` e `DELETE` em ocorrência → `405`; chamar `instancia.update()`/`destroy()` do modelo fora da API → `OCORRENCIA_IMUTAVEL`/`OCORRENCIA_NAO_PODE_SER_EXCLUIDA` (hooks do Sequelize, sem trigger de banco)                      |
 | P2          | Professor sem vínculo: registrar, listar por `turmaId`, detalhar e arquivar → `403`                  |
 | P3          | Registrar → transferir aluno → a ocorrência antiga mantém a turma original                           |
 | P4          | Arquivar sem motivo → `400`; duplo arquivamento → `409`; após arquivar, original intacto             |
