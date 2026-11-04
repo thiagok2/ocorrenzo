@@ -1,20 +1,49 @@
 @base = http://localhost:3333/api
-@token = token-simulado
 @ocorrenciaId = 7a2e9c44-51b3-4f6e-8c2d-0e3f6a1b9d55
 @alunoId = 0f5c3b1e-8d7a-4f0a-9d7e-2a6c1b9e4a10
 
 ### R01 - health
 GET {{base}}/health
 
-### R02 - login (resposta simulada; guarde o token retornado na variável @token)
+### R02 - login real (coordenador do seed; token é usado automaticamente abaixo)
+# @name login
 POST {{base}}/auth/login
 Content-Type: application/json
 
 { "matricula": "2026000001", "senha": "senha123" }
 
-### R03 - usuário autenticado (resposta simulada)
+### R02 - login com senha errada (deve retornar 401 CREDENCIAIS_INVALIDAS)
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "matricula": "2026000001", "senha": "senha-errada" }
+
+### R02 - login com matrícula inexistente (deve retornar a MESMA mensagem 401 acima)
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "matricula": "0000000000", "senha": "senha123" }
+
+@token = {{login.response.body.$.token}}
+
+### R03 - usuário autenticado
 GET {{base}}/auth/me
 Authorization: Bearer {{token}}
+
+### R03 - sem token (deve retornar 401 NAO_AUTENTICADO)
+GET {{base}}/auth/me
+
+### R04 - sem token (deve retornar 401 NAO_AUTENTICADO — rota ainda simulada, mas já protegida)
+POST {{base}}/ocorrencias
+Content-Type: application/json
+
+{
+  "alunoId": "{{alunoId}}",
+  "tipo": "uso_indevido_celular",
+  "gravidade": "leve",
+  "descricao": "Utilizou o celular durante a aula.",
+  "data": "2026-05-12"
+}
 
 ### R04 - registrar ocorrência
 POST {{base}}/ocorrencias
