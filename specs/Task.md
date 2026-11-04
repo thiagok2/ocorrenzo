@@ -34,7 +34,7 @@
 ### FASE 1 — BACKEND (API Node.js + Express + PostgreSQL + Sequelize)
 
 - [x] **1.1** Projeto Express + **rotas do núcleo testáveis** (respostas simuladas) + `api.http` — _P/M_ — **PRIMEIRA TAREFA**
-- [ ] **1.2** PostgreSQL + Sequelize: conexão, modelos, migrations, trigger e seeds — _M_
+- [x] **1.2** PostgreSQL + Sequelize: conexão, modelos, migrations e seeds — _M_
 - [ ] **1.3** Autenticação real e middlewares (R02, R03) — _M_
 - [ ] **1.4** **Registrar ocorrência** de verdade (R04) — _M_
 - [ ] **1.5** Listar e detalhar ocorrências com filtros e paginação (R05, R06) — _M_
@@ -228,7 +228,7 @@ module.exports = router;
 
 ---
 
-## Tarefa 1.2 — PostgreSQL + Sequelize
+## Tarefa 1.2 — PostgreSQL + Sequelize ✅ CONCLUÍDA
 
 **Objetivo:** persistir os dados reais com as constraints que garantem as regras (RN1, RN5).
 
@@ -291,22 +291,24 @@ npx sequelize-cli db:migrate
 npx sequelize-cli db:seed:all
 ```
 
-**Dados de desenvolvimento (seeders)** — senha de **todos** os usuários: `senha123` (apenas desenvolvimento). Os alunos criados pela rota R15 (Tarefa 1.8) seguem a regra real: senha inicial = matrícula.
+**Dados de desenvolvimento (seeders)** — senha de **todos** os usuários: `senha123` (apenas desenvolvimento). Dados reais da turma do estudante (uma única turma). Os alunos criados pela rota R15 (Tarefa 1.8) seguem a regra real: senha inicial = matrícula.
 
-| Matrícula     | Nome                  | Perfil       | Observação                                  |
-| ------------- | --------------------- | ------------ | ------------------------------------------- |
-| `2026000001`  | Verônica Lima         | coordenador  | —                                           |
-| `2026000002`  | Prof. Marcos Andrade  | professor    | vinculado às turmas **8º A** e **9º B**     |
-| `2026000003`  | Profa. Helena Souza   | professor    | vinculada à turma **7º C**                  |
-| `2026010101`…`2026010107` | Ana Clara Silva, Bruno Alves Lima, Daniela Rocha Torres, Eduardo Pires Santos, Fernanda Lopes Dias, Lucas Gabriel Oliveira, Mateus Costa Ribeiro | aluno | todos na turma **8º A** |
-| `2026020101`, `2026030101` | 1 aluno no 9º B e 1 aluno no 7º C | aluno | para testar o isolamento entre turmas |
+| Matrícula     | Nome                  | Perfil             | Observação                                  |
+| ------------- | --------------------- | ------------------ | -------------------------------------------- |
+| `2026000001`  | Marcio Roberio        | coordenador        | —                                            |
+| `2026000002`  | Thiago Oliveira       | professor          | vinculado à turma **3º Ano**                 |
+| `2026000003`  | Osvaldo Pife          | professor          | vinculado à turma **3º Ano**                 |
+| `2026000004`  | Marici Lopes          | professor          | vinculado à turma **3º Ano**                 |
+| `2026000005`  | Fabricia              | apoio_pedagogico   | —                                             |
+| `2026000006`  | Lidiane               | apoio_pedagogico   | —                                             |
+| 22 matrículas reais (`2024...`) | 22 alunos (nomes reais) | aluno | todos na turma **3º Ano** — ver `src/database/seeders/20261104090001-dev-turma-unica-e-pessoas.cjs` |
 
 **Pronto quando**
 
-- [ ] `db:migrate` cria as 5 tabelas sem erro; `db:migrate:undo:all` desfaz.
-- [ ] `db:seed:all` cria os dados acima.
-- [ ] Alterar uma ocorrência com `instancia.save()` fora dos campos de arquivamento lança `OCORRENCIA_IMUTAVEL`; `instancia.destroy()` lança `OCORRENCIA_NAO_PODE_SER_EXCLUIDA` (hooks do modelo, sem trigger de banco — ver Design §3.6).
-- [ ] `GET /api/health` mostra `"banco": "conectado"`.
+- [x] `db:migrate` cria as 5 tabelas sem erro; `db:migrate:undo:all` desfaz.
+- [x] `db:seed:all` cria os dados acima.
+- [x] Alterar uma ocorrência com `instancia.save()` fora dos campos de arquivamento lança `OCORRENCIA_IMUTAVEL`; `instancia.destroy()` lança `OCORRENCIA_NAO_PODE_SER_EXCLUIDA` (hooks do modelo, sem trigger de banco — ver Design §3.6).
+- [x] `GET /api/health` mostra `"banco": "conectado"`.
 
 ---
 
