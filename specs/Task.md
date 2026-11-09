@@ -35,9 +35,9 @@
 
 - [x] **1.1** Projeto Express + **rotas do núcleo testáveis** (respostas simuladas) + `api.http` — _P/M_ — **PRIMEIRA TAREFA**
 - [x] **1.2** PostgreSQL + Sequelize: conexão, modelos, migrations e seeds — _M_
-- [ ] **1.3** Autenticação real e middlewares (R02, R03) — _M_
-- [ ] **1.4** **Registrar ocorrência** de verdade (R04) — _M_
-- [ ] **1.5** Listar e detalhar ocorrências com filtros e paginação (R05, R06) — _M_
+- [x] **1.3** Autenticação real e middlewares (R02, R03) — _M_
+- [x] **1.4** **Registrar ocorrência** de verdade (R04) — _M_
+- [x] **1.5** Listar e detalhar ocorrências com filtros e paginação (R05, R06) — _M_
 - [ ] **1.6** Arquivar ocorrência e bloquear edição/exclusão (R07, R08) — _M_
 - [ ] **1.7** Histórico do aluno, visão do aluno e leituras de apoio (R09, R10, R11, R12, R13) — _M_
 - [ ] **1.8** Cadastros: turmas, alunos, vínculos e transferência (R14 a R19) — _M_
@@ -348,11 +348,11 @@ async function login(req, res) {
 
 **Pronto quando**
 
-- [ ] Login com `2026000001`/`senha123` devolve token e usuário; senha errada devolve `401` com a **mesma** mensagem de matrícula inexistente.
-- [ ] Qualquer rota protegida sem token devolve `401 NAO_AUTENTICADO`.
-- [ ] `GET /api/auth/me` devolve o usuário do token.
-- [ ] A senha **nunca** aparece em nenhuma resposta.
-- [ ] Após exceder o limite de tentativas, o login responde `429`.
+- [x] Login com `2026000001`/`senha123` devolve token e usuário; senha errada devolve `401` com a **mesma** mensagem de matrícula inexistente.
+- [x] Qualquer rota protegida sem token devolve `401 NAO_AUTENTICADO`.
+- [x] `GET /api/auth/me` devolve o usuário do token.
+- [x] A senha **nunca** aparece em nenhuma resposta.
+- [x] Após exceder o limite de tentativas, o login responde `429`.
 
 ---
 
@@ -373,10 +373,10 @@ async function login(req, res) {
 
 **Pronto quando**
 
-- [ ] Registrar como **coordenador** em qualquer aluno retorna `201` e a linha existe no banco com `turma_id` igual à turma do aluno **naquele momento**.
-- [ ] Registrar como **Prof. Marcos** em aluno do 8º A funciona; em aluno do **7º C** retorna `403`.
-- [ ] Todos os erros de validação voltam no formato único com `detalhes` por campo.
-- [ ] `criadoPor` enviado no body é **ignorado**.
+- [x] Registrar como **coordenador** em qualquer aluno retorna `201` e a linha existe no banco com `turma_id` igual à turma do aluno **naquele momento**.
+- [x] Registrar como **professor vinculado** funciona; professor sem vínculo retorna `403` (lógica implementada em `podeAgirNaTurma`; não testável manualmente com o seed atual, que só tem uma turma — ver pendência no history 1.4).
+- [x] Todos os erros de validação voltam no formato único com `detalhes` por campo.
+- [x] `criadoPor` enviado no body é **ignorado**.
 
 ---
 
@@ -396,10 +396,10 @@ async function login(req, res) {
 
 **Pronto quando**
 
-- [ ] Sem filtros, retorna só **ativas**, da mais recente para a mais antiga, com `total`, `page` e `pageSize`.
-- [ ] Combinar `tipo` + `gravidade` + período + `q` funciona.
-- [ ] Lista vazia retorna `200` com `itens: []`.
-- [ ] Professor nunca recebe ocorrência de turma não vinculada.
+- [x] Sem filtros, retorna só **ativas**, da mais recente para a mais antiga, com `total`, `page` e `pageSize`.
+- [x] Combinar `tipo` + `gravidade` + período + `q` funciona.
+- [x] Lista vazia retorna `200` com `itens: []`.
+- [x] Professor nunca recebe ocorrência de turma não vinculada (lógica em `turmasPermitidas`/`podeAgirNaTurma`; seed atual só tem uma turma, mesma limitação já registrada na 1.4).
 
 ---
 

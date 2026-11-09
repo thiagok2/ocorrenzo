@@ -7,7 +7,12 @@ export default function validar(esquema, origem = 'body') {
       const detalhes = error.details.map((d) => ({ campo: d.path.join('.'), mensagem: d.message }));
       return next(new ErroApp(400, 'VALIDACAO', 'Dados inválidos.', detalhes));
     }
-    req[origem] = value;
+    if (origem === 'query') {
+      // Express 5: req.query só tem getter — não dá pra fazer req.query = value direto.
+      Object.defineProperty(req, 'query', { value, writable: true, configurable: true, enumerable: true });
+    } else {
+      req[origem] = value;
+    }
     return next();
   };
 }

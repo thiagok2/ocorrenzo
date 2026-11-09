@@ -1,4 +1,4 @@
-// R04 a R10 ainda simulados — serão trocados pela versão real nas tarefas 1.4 a 1.8
+// R07 a R10 ainda simulados — serão trocados pela versão real nas tarefas 1.6 a 1.8
 import { Router } from 'express';
 import ocorrenciasRouter from './ocorrencias.routes.js';
 import authRouter from './auth.routes.js';
@@ -20,7 +20,7 @@ router.use('/auth', authRouter); // R02 (público) e R03 (protegida dentro do pr
 
 router.use(autenticar); // a partir daqui, toda rota exige token válido
 
-router.use('/ocorrencias', ocorrenciasRouter); // R04 a R08 (ainda com respostas simuladas)
+router.use('/ocorrencias', ocorrenciasRouter); // R04 a R06 reais; R07 e R08 ainda com respostas simuladas
 
 router.get('/alunos/:id/ocorrencias', (req, res) => // R09
   res.json({

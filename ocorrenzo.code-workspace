@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "backend"
+		}
+	],
+	"settings": {},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"type": "node",
+				"request": "launch",
+				"name": "Debug Backend (nodemon)",
+				"runtimeExecutable": "${workspaceFolder:backend}/node_modules/.bin/nodemon",
+				"program": "${workspaceFolder:backend}/src/server.js",
+				"cwd": "${workspaceFolder:backend}",
+				"restart": true,
+				"console": "integratedTerminal",
+				"internalConsoleOptions": "neverOpen",
+				"skipFiles": ["<node_internals>/**"]
+			}
+		]
+	}
+}

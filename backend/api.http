@@ -1,6 +1,6 @@
 @base = http://localhost:3333/api
 @ocorrenciaId = 7a2e9c44-51b3-4f6e-8c2d-0e3f6a1b9d55
-@alunoId = 0f5c3b1e-8d7a-4f0a-9d7e-2a6c1b9e4a10
+@alunoId = ca62d2a6-d5e9-4f45-b73e-bee68fc10e59
 
 ### R01 - health
 GET {{base}}/health
@@ -33,7 +33,7 @@ Authorization: Bearer {{token}}
 ### R03 - sem token (deve retornar 401 NAO_AUTENTICADO)
 GET {{base}}/auth/me
 
-### R04 - sem token (deve retornar 401 NAO_AUTENTICADO — rota ainda simulada, mas já protegida)
+### R04 - sem token (deve retornar 401 NAO_AUTENTICADO)
 POST {{base}}/ocorrencias
 Content-Type: application/json
 
@@ -45,7 +45,8 @@ Content-Type: application/json
   "data": "2026-05-12"
 }
 
-### R04 - registrar ocorrência
+### R04 - registrar ocorrência (caminho feliz, coordenador) — deve retornar 201
+# @name registrar
 POST {{base}}/ocorrencias
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -58,13 +59,136 @@ Content-Type: application/json
   "data": "2026-05-12"
 }
 
-### R05 - listar ocorrências (ativas, filtro por gravidade)
-GET {{base}}/ocorrencias?situacao=ativas&gravidade=leve&page=1&pageSize=10
+@ocorrenciaIdReal = {{registrar.response.body.$.id}}
+
+### R04 - login como aluno (Alana Sofia) — para testar o 403 abaixo
+# @name loginAluno
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "matricula": "2024308532", "senha": "senha123" }
+
+@tokenAluno = {{loginAluno.response.body.$.token}}
+
+### R04 - aluno tentando registrar (deve retornar 403 ACESSO_NEGADO, pelo autorizarPerfil)
+POST {{base}}/ocorrencias
+Authorization: Bearer {{tokenAluno}}
+Content-Type: application/json
+
+{
+  "alunoId": "{{alunoId}}",
+  "tipo": "uso_indevido_celular",
+  "gravidade": "leve",
+  "descricao": "Utilizou o celular durante a aula.",
+  "data": "2026-05-12"
+}
+
+### R04 - alunoId inexistente (deve retornar 404 NAO_ENCONTRADO)
+POST {{base}}/ocorrencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "alunoId": "00000000-0000-4000-8000-000000000000",
+  "tipo": "uso_indevido_celular",
+  "gravidade": "leve",
+  "descricao": "Utilizou o celular durante a aula.",
+  "data": "2026-05-12"
+}
+
+### R04 - descrição vazia (deve retornar 400 VALIDACAO com detalhes)
+POST {{base}}/ocorrencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "alunoId": "{{alunoId}}",
+  "tipo": "uso_indevido_celular",
+  "gravidade": "leve",
+  "descricao": "",
+  "data": "2026-05-12"
+}
+
+### R04 - data futura (deve retornar 400 VALIDACAO)
+POST {{base}}/ocorrencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "alunoId": "{{alunoId}}",
+  "tipo": "uso_indevido_celular",
+  "gravidade": "leve",
+  "descricao": "Utilizou o celular durante a aula.",
+  "data": "2027-01-01"
+}
+
+### R04 - tipo inexistente (deve retornar 400 VALIDACAO)
+POST {{base}}/ocorrencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "alunoId": "{{alunoId}}",
+  "tipo": "tipo_que_nao_existe",
+  "gravidade": "leve",
+  "descricao": "Utilizou o celular durante a aula.",
+  "data": "2026-05-12"
+}
+
+### R04 - criadoPor enviado no body deve ser ignorado (sempre vem do token)
+POST {{base}}/ocorrencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "alunoId": "{{alunoId}}",
+  "tipo": "atraso",
+  "gravidade": "leve",
+  "descricao": "Chegou atrasado após o intervalo.",
+  "data": "2026-05-12",
+  "criadoPor": "00000000-0000-4000-8000-000000000000"
+}
+
+### R05 - listar ocorrências (padrão: só ativas, mais recente primeiro)
+GET {{base}}/ocorrencias
 Authorization: Bearer {{token}}
 
-### R06 - detalhar ocorrência
-GET {{base}}/ocorrencias/{{ocorrenciaId}}
+### R05 - listar com filtros combinados (gravidade + tipo + paginação)
+GET {{base}}/ocorrencias?situacao=ativas&gravidade=leve&tipo=uso_indevido_celular&page=1&pageSize=10
 Authorization: Bearer {{token}}
+
+### R05 - buscar por nome/matrícula do aluno (q)
+GET {{base}}/ocorrencias?q=Alana
+Authorization: Bearer {{token}}
+
+### R05 - aluno não pode listar (deve retornar 403, fora do autorizarPerfil)
+GET {{base}}/ocorrencias
+Authorization: Bearer {{tokenAluno}}
+
+### R06 - detalhar a ocorrência recém-criada (coordenador) — 200
+GET {{base}}/ocorrencias/{{ocorrenciaIdReal}}
+Authorization: Bearer {{token}}
+
+### R06 - aluno titular detalhando a própria ocorrência — 200
+GET {{base}}/ocorrencias/{{ocorrenciaIdReal}}
+Authorization: Bearer {{tokenAluno}}
+
+### R06 - ocorrência inexistente — 404 NAO_ENCONTRADO
+GET {{base}}/ocorrencias/00000000-0000-4000-8000-000000000000
+Authorization: Bearer {{token}}
+
+### R06 - login como outro aluno (Ana Lara) — não é o titular da ocorrência acima
+# @name loginOutroAluno
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "matricula": "2024308579", "senha": "senha123" }
+
+@tokenOutroAluno = {{loginOutroAluno.response.body.$.token}}
+
+### R06 - aluno que não é o titular tentando ver a ocorrência de outro — 403 ACESSO_NEGADO
+GET {{base}}/ocorrencias/{{ocorrenciaIdReal}}
+Authorization: Bearer {{tokenOutroAluno}}
 
 ### R07 - arquivar ocorrência
 POST {{base}}/ocorrencias/{{ocorrenciaId}}/arquivamento

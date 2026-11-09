@@ -241,3 +241,17 @@ done
 ## Próximo passo
 
 Confirmar os testes acima, marcar a Tarefa 1.3 como concluída em `specs/Task.md` e seguir para a Tarefa 1.4 — registrar ocorrência de verdade (a rota mais importante do projeto), onde `autorizarPerfil` e a lógica de escopo por turma finalmente entram em uso.
+
+## Confirmação dos testes (09/11/2026)
+
+Todos os casos do roteiro acima foram confirmados via `curl` com o servidor no ar:
+
+- Login com `2026000001`/`senha123` → `200` com `token` e `usuario` (sem campo de senha).
+- Senha errada e matrícula inexistente → ambas `401 CREDENCIAIS_INVALIDAS`, mesma mensagem.
+- `GET /auth/me` com token → `200` com os dados do coordenador; sem token → `401 NAO_AUTENTICADO`.
+- `POST /ocorrencias` sem token → `401 NAO_AUTENTICADO` (confirma que `router.use(autenticar)` protege tudo depois de `/auth`).
+- Rate limit: a partir da 11ª tentativa de login dentro da janela de 15 min, a resposta passa a ser `429 MUITAS_TENTATIVAS` (os headers `RateLimit-*` confirmam o contador e o tempo de reset).
+
+Também foi configurado um launch config de debug no VSCode (`ocorrenzo.code-workspace` → chave `launch`, config **"Debug Backend (nodemon)"**) para demonstrar a execução passo a passo do `login()` com breakpoints. Observação importante sobre esse fluxo: como o rate limit guarda o contador em memória por processo, reiniciar a sessão de debug reseta o limite — mas repetir o roteiro de teste completo (incluindo o loop de 11 tentativas) várias vezes dentro da mesma janela de 15 min pode "gastar" as tentativas disponíveis antes da demonstração do breakpoint.
+
+**Tarefa 1.3 concluída.** Próximo: Tarefa 1.4 (registrar ocorrência de verdade).

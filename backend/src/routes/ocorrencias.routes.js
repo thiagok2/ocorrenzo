@@ -1,5 +1,9 @@
-// VERSÃO SIMULADA — será trocada pela implementação real nas tarefas 1.4 a 1.6
+// R07 e R08 ainda simulados — serão trocados pela implementação real na tarefa 1.6
 import { Router } from 'express';
+import autorizarPerfil from '../middlewares/autorizarPerfil.js';
+import validar from '../middlewares/validar.js';
+import { esquemaRegistro, esquemaListagem } from '../validators/ocorrencia.validator.js';
+import * as ocorrenciaController from '../controllers/ocorrencia.controller.js';
 
 const router = Router();
 
@@ -18,9 +22,9 @@ const ocorrenciaExemplo = {
   criadoEm: '2026-05-12T14:03:21.000Z',
 };
 
-router.post('/', (req, res) => res.status(201).json(ocorrenciaExemplo)); // R04
-router.get('/', (req, res) => res.json({ itens: [ocorrenciaExemplo], total: 1, page: 1, pageSize: 10 })); // R05
-router.get('/:id', (req, res) => res.json(ocorrenciaExemplo)); // R06
+router.post('/', autorizarPerfil('professor', 'coordenador'), validar(esquemaRegistro), ocorrenciaController.registrar); // R04
+router.get('/', autorizarPerfil('professor', 'coordenador', 'apoio_pedagogico'), validar(esquemaListagem, 'query'), ocorrenciaController.listar); // R05
+router.get('/:id', ocorrenciaController.detalhar); // R06 — escopo (turma/titular) resolvido no service
 router.post('/:id/arquivamento', (req, res) => // R07
   res.json({
     ...ocorrenciaExemplo,
