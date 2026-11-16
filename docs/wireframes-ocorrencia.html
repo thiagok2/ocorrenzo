@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframes — Ocorrência+</title>
+<style>
+  :root {
+    --wf-ink: #334155;
+    --wf-ink-soft: #64748b;
+    --wf-line: #94a3b8;
+    --wf-box: #eef2f7;
+    --wf-box-strong: #e2e8f2;
+    --wf-bg: #f6f7fb;
+    --wf-surface: #ffffff;
+    --wf-accent: #3b5bb0;
+    --wf-accent-soft: #e4e9f8;
+    --wf-warn: #b45309;
+    --wf-crit: #b91c1c;
+    --font-display: 'Space Mono', monospace;
+    --font-body: 'Inter', system-ui, sans-serif;
+    /* layout: sidebar fixa de navegação + área de conteúdo rolável com "tela" centrada */
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--wf-bg); color: var(--wf-ink); font-family: var(--font-body); }
+  body { display: flex; }
+
+  /* ---------- NAV LATERAL ---------- */
+  nav.sidebar {
+    width: 230px; flex: 0 0 230px; background: var(--wf-surface); border-right: 1px solid #dbe1ea;
+    padding: 20px 14px; overflow-y: auto; height: 100vh; position: sticky; top: 0;
+  }
+  nav.sidebar h1 { font-family: var(--font-display); font-size: 13px; letter-spacing: .04em; color: var(--wf-ink); margin: 0 0 2px; }
+  nav.sidebar .sub { font-size: 11px; color: var(--wf-ink-soft); margin-bottom: 18px; }
+  nav.sidebar .grupo { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #9aa6b8; margin: 18px 0 6px 4px; }
+  nav.sidebar a {
+    display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--wf-ink);
+    font-size: 13px; padding: 8px 10px; border-radius: 6px; margin-bottom: 2px; border: 1px solid transparent;
+  }
+  nav.sidebar a .n { font-family: var(--font-display); font-size: 10px; color: var(--wf-ink-soft); width: 20px; }
+  nav.sidebar a.ativo { background: var(--wf-accent-soft); border-color: #c7d3ef; color: var(--wf-accent); font-weight: 600; }
+  nav.sidebar a:hover { background: #f1f4fa; }
+  nav.sidebar a .flag { margin-left: auto; font-size: 9px; padding: 2px 5px; border-radius: 4px; }
+  nav.sidebar a .flag.proto { background: #fef3c7; color: var(--wf-warn); }
+  nav.sidebar a .flag.fase3 { background: #e2e8f0; color: #64748b; }
+
+  /* ---------- ÁREA DE CONTEÚDO ---------- */
+  main.stage { flex: 1; min-width: 0; height: 100vh; overflow-y: auto; padding: 32px 32px 80px; }
+  .view { display: none; max-width: 1320px; margin: 0 auto; }
+  .view.ativo { display: block; }
+
+  .view-head { margin-bottom: 18px; }
+  .view-head h2 { font-family: var(--font-display); font-size: 18px; margin: 0 0 4px; color: var(--wf-ink); }
+  .view-head .meta { font-size: 12px; color: var(--wf-ink-soft); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .badge-flag { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+  .badge-flag.figma { background: #dcf5e6; color: #1f7a47; }
+  .badge-flag.proto { background: #fef3c7; color: var(--wf-warn); }
+  .badge-flag.fase3 { background: #e2e8f0; color: #475569; }
+
+  /* ---------- "TELA" — moldura simulando o browser ---------- */
+  .screen { background: var(--wf-surface); border: 1px solid #d7dee8; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(20,30,50,.05); }
+  .screen-bar { background: #e9edf4; padding: 6px 10px; font-size: 10px; color: #8a96ac; border-bottom: 1px solid #d7dee8; font-family: var(--font-display); }
+
+  /* ---------- CAIXA DE WIREFRAME (componente anotado) ---------- */
+  .wf {
+    border: 1.5px dashed var(--wf-line); background: var(--wf-box); border-radius: 6px;
+    position: relative; padding: 14px 12px 12px; margin: 10px;
+  }
+  .wf > .tag {
+    position: absolute; top: -9px; left: 8px; background: var(--wf-bg); padding: 0 6px;
+    font-family: var(--font-display); font-size: 9px; letter-spacing: .03em; color: var(--wf-ink-soft);
+  }
+  .screen .wf.pad0 { margin: 0; border-radius: 0; border-left: none; border-right: none; }
+
+  /* ---------- controles "reais" dentro do wireframe ---------- */
+  .ctl-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .field { display: flex; flex-direction: column; gap: 3px; }
+  .field label { font-size: 10px; color: var(--wf-ink-soft); }
+  .field input, .field select, .field textarea {
+    font-family: var(--font-body); font-size: 12px; padding: 7px 9px; border: 1px solid #c7cfdb; border-radius: 5px;
+    background: var(--wf-surface); color: var(--wf-ink); min-width: 140px;
+  }
+  .field textarea { min-width: 260px; resize: vertical; }
+  .hint { font-size: 10px; color: var(--wf-ink-soft); }
+
+  .btn { font-size: 12px; padding: 8px 14px; border-radius: 6px; border: 1px solid #c7cfdb; background: #fff; color: var(--wf-ink); cursor: pointer; font-family: var(--font-body); }
+  .btn.primario { background: var(--wf-accent); border-color: var(--wf-accent); color: #fff; font-weight: 600; }
+  .btn.ghost { border-style: dashed; color: var(--wf-ink-soft); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  .tabs { display: flex; gap: 4px; }
+  .tabs .tab { font-size: 12px; padding: 7px 12px; border-radius: 6px 6px 0 0; border: 1px solid #c7cfdb; border-bottom: none; background: #f1f4fa; color: var(--wf-ink-soft); cursor: pointer; }
+  .tabs .tab.on { background: #fff; color: var(--wf-accent); font-weight: 700; border-color: var(--wf-accent); }
+
+  .seg { display: inline-flex; border: 1px solid #c7cfdb; border-radius: 6px; overflow: hidden; }
+  .seg button { font-size: 12px; padding: 7px 12px; background: #fff; border: none; border-right: 1px solid #c7cfdb; cursor: pointer; color: var(--wf-ink); }
+  .seg button:last-child { border-right: none; }
+  .seg button.on { background: var(--wf-accent-soft); color: var(--wf-accent); font-weight: 700; }
+
+  table.wftable { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.wftable th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .03em; color: var(--wf-ink-soft); padding: 8px 10px; border-bottom: 1px solid #dbe1ea; }
+  table.wftable td { padding: 9px 10px; border-bottom: 1px solid #eceff5; vertical-align: middle; }
+  table.wftable tr:hover td { background: #f7f9fc; }
+
+  .avatar { width: 26px; height: 26px; border-radius: 50%; background: #d7e0f3; color: var(--wf-accent); font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle; }
+
+  .pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+  .pill.leve { background: #dcf5e6; color: #1f7a47; }
+  .pill.media { background: #fef3c7; color: var(--wf-warn); }
+  .pill.grave { background: #fee2e2; color: var(--wf-crit); }
+  .pill.ativa { background: #dbeafe; color: #1d4ed8; }
+  .pill.arquivada { background: #f3f4f6; color: #4b5563; }
+
+  .stat-row { display: flex; gap: 10px; }
+  .stat-tile { flex: 1; border: 1px solid #dbe1ea; border-radius: 8px; padding: 10px 12px; background: #fff; }
+  .stat-tile .num { font-family: var(--font-display); font-size: 18px; }
+  .stat-tile .lbl { font-size: 10px; color: var(--wf-ink-soft); }
+
+  .menu-dots { cursor: pointer; font-size: 16px; color: var(--wf-ink-soft); padding: 2px 6px; border-radius: 4px; position: relative; }
+  .menu-dots:hover { background: #eef2f7; }
+  .dropdown { position: absolute; right: 0; top: 24px; background: #fff; border: 1px solid #d7dee8; border-radius: 6px; box-shadow: 0 6px 16px rgba(20,30,50,.12); z-index: 20; min-width: 180px; display: none; }
+  .dropdown.show { display: block; }
+  .dropdown button { display: block; width: 100%; text-align: left; padding: 9px 12px; font-size: 12px; background: none; border: none; cursor: pointer; color: var(--wf-ink); }
+  .dropdown button:hover { background: #f1f4fa; }
+
+  .flow-note { font-size: 11px; color: var(--wf-accent); background: var(--wf-accent-soft); border-left: 3px solid var(--wf-accent); padding: 6px 10px; border-radius: 0 4px 4px 0; margin: 8px 10px; }
+  .rn5-note { font-size: 11px; color: #92400e; background: #fef3c7; border-left: 3px solid #d97706; padding: 6px 10px; border-radius: 0 4px 4px 0; margin: 8px 10px; }
+
+  /* ---------- header simulado do app ---------- */
+  .app-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #fff; border-bottom: 1px solid #dbe1ea; }
+  .app-header .logo { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--wf-accent); }
+  .app-header .tabs-top { display: flex; gap: 18px; font-size: 12px; }
+  .app-header .tabs-top span { padding-bottom: 10px; color: var(--wf-ink-soft); cursor: default; }
+  .app-header .tabs-top span.on { color: var(--wf-accent); font-weight: 700; border-bottom: 2px solid var(--wf-accent); }
+  .app-header .user { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+
+  .page-head { padding: 14px 16px 6px; display: flex; align-items: baseline; justify-content: space-between; }
+  .page-head h3 { font-size: 15px; margin: 0; }
+  .page-head .sub { font-size: 11px; color: var(--wf-ink-soft); margin-top: 2px; }
+
+  .filterbar { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid #eceff5; }
+
+  .pager { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; font-size: 11px; color: var(--wf-ink-soft); }
+
+  /* ---------- overlays: drawer e dialog ---------- */
+  .scrim { position: fixed; inset: 0; background: rgba(20,30,50,.35); display: none; z-index: 90; }
+  .scrim.show { display: block; }
+  .drawer { position: fixed; top: 0; right: -420px; width: 400px; height: 100%; background: #fff; box-shadow: -8px 0 24px rgba(20,30,50,.18); z-index: 95; display: flex; flex-direction: column; transition: right .18s ease; }
+  .drawer.show { right: 0; }
+  .drawer .d-head { padding: 16px; border-bottom: 1px solid #eceff5; display: flex; justify-content: space-between; align-items: baseline; }
+  .drawer .d-head h4 { margin: 0; font-size: 14px; }
+  .drawer .d-head .x { cursor: pointer; color: var(--wf-ink-soft); font-size: 16px; }
+  .drawer .d-body { padding: 14px 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+  .drawer .d-foot { padding: 14px 16px; border-top: 1px solid #eceff5; display: flex; justify-content: flex-end; gap: 8px; }
+
+  .dialog { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%); width: 420px; background: #fff; border-radius: 10px; box-shadow: 0 20px 48px rgba(20,30,50,.25); z-index: 95; display: none; }
+  .dialog.show { display: block; }
+  .dialog .d-head { padding: 16px; border-bottom: 1px solid #eceff5; display: flex; justify-content: space-between; align-items: baseline; }
+  .dialog .d-head h4 { margin: 0; font-size: 14px; }
+  .dialog .d-head .x { cursor: pointer; color: var(--wf-ink-soft); font-size: 16px; }
+  .dialog .d-body { padding: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .dialog .d-foot { padding: 14px 16px; border-top: 1px solid #eceff5; display: flex; justify-content: flex-end; gap: 8px; }
+  .kv { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px dotted #eceff5; }
+  .kv span:first-child { color: var(--wf-ink-soft); }
+
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 11px; color: var(--wf-ink-soft); margin-top: 10px; }
+  .legend b { color: var(--wf-ink); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 300px; gap: 0; }
+  .two-col > .wf { margin: 10px; }
+
+  .recent-item { display: flex; justify-content: space-between; font-size: 11px; padding: 6px 0; border-bottom: 1px dotted #eceff5; }
+
+  code.inline { background: #eef2f7; padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <h1>OCORRÊNCIA+</h1>
+  <div class="sub">Wireframes de navegação<br>baixa fidelidade · Fase 2</div>
+
+  <div class="grupo">Início</div>
+  <a href="#intro" data-view="intro"><span class="n">00</span> Como usar isto</a>
+
+  <div class="grupo">Com Figma</div>
+  <a href="#login" data-view="login"><span class="n">01</span> Login <span class="flag" style="background:#dcf5e6;color:#1f7a47;">figma</span></a>
+  <a href="#ocorrencias" data-view="ocorrencias"><span class="n">02</span> Ocorrências <span class="flag" style="background:#dcf5e6;color:#1f7a47;">figma</span></a>
+  <a href="#alunos" data-view="alunos"><span class="n">03</span> Alunos <span class="flag" style="background:#dcf5e6;color:#1f7a47;">figma</span></a>
+
+  <div class="grupo">A prototipar</div>
+  <a href="#ficha-aluno" data-view="ficha-aluno"><span class="n">04</span> Ficha do aluno <span class="flag proto">proto</span></a>
+  <a href="#cadastros" data-view="cadastros"><span class="n">05</span> Cadastros <span class="flag proto">proto</span></a>
+  <a href="#meu-historico" data-view="meu-historico"><span class="n">06</span> Meu histórico <span class="flag proto">proto</span></a>
+
+  <div class="grupo">Fase 3</div>
+  <a href="#painel" data-view="painel"><span class="n">07</span> Painel <span class="flag fase3">fase 3</span></a>
+</nav>
+
+<main class="stage">
+
+  <!-- ============ 00. INTRO ============ -->
+  <section class="view" id="view-intro">
+    <div class="view-head">
+      <h2>Como usar estes wireframes</h2>
+      <div class="meta">Baixa fidelidade — layout e fluxo, não visual final.</div>
+    </div>
+    <div class="wf"><span class="tag">Por quê</span>
+      <p style="font-size:13px;">Antes de escrever o primeiro componente React, este guia serve de "rascunho em papel": mostra onde cada bloco fica em cada tela e como os fluxos (abrir um drawer, arquivar, transferir) se encaixam — baseado inteiramente em <code class="inline">specs/Design.md</code> §4. Três páginas (<b>Ficha do aluno</b>, <b>Cadastros</b>, <b>Meu histórico</b>) não têm nenhum frame no Figma original — só descrição em texto — então essas aqui são a primeira vez que elas ganham uma forma visual, mesmo que rascunhada.</p>
+    </div>
+    <div class="wf"><span class="tag">Legenda</span>
+      <div class="legend">
+        <span><b>Caixa tracejada</b> = região de um componente (o nome no canto é o nome do componente no Design.md)</span>
+        <span><b>Linha sólida</b> = controle real (clicável nesta demo)</span>
+        <span><span class="badge-flag figma">figma</span> = existe frame no Figma original</span>
+        <span><span class="badge-flag proto">proto</span> = "a prototipar" — sem Figma, só texto</span>
+      </div>
+    </div>
+    <div class="wf"><span class="tag">O que é clicável</span>
+      <ul style="font-size:12px; margin: 6px 0 2px 18px;">
+        <li>Botões <b>Nova ocorrência</b>, <b>⋮</b> das tabelas, e os botões de rodapé dos drawers/diálogos abrem de verdade (é tudo HTML/JS simples, sem backend).</li>
+        <li>Os dados nas tabelas são exemplos fixos — não vêm da API.</li>
+        <li>Use a navegação da esquerda ou a URL (<code class="inline">#ocorrencias</code>, <code class="inline">#cadastros</code>...) pra saltar entre páginas.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 01. LOGIN ============ -->
+  <section class="view" id="view-login">
+    <div class="view-head">
+      <h2>01 · LoginPage — <code class="inline">/login</code></h2>
+      <div class="meta"><span class="badge-flag figma">figma: frame "Login"</span> perfis: público · API: R02, R03</div>
+    </div>
+    <div class="screen">
+      <div class="screen-bar">localhost:5173/login</div>
+      <div style="display:flex; min-height:480px;">
+        <div class="wf pad0" style="flex:1; background:#e8f3e8; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px; border-right:1.5px dashed var(--wf-line);">
+          <span class="tag">LoginHero</span>
+          <div style="font-family:var(--font-display); font-size:20px; color:#2a622d;">Ocorrência+</div>
+          <div style="font-size:13px; color:#2a622d; text-align:center; max-width:220px;">"Do registro à decisão."</div>
+          <div style="font-size:10px; color:#4b6e4d; text-align:center; max-width:200px;">3 benefícios em texto estático (registrar, consultar, arquivar)</div>
+        </div>
+        <div class="wf pad0" style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px;">
+          <span class="tag">LoginForm</span>
+          <div style="width:260px; display:flex; flex-direction:column; gap:10px;">
+            <div class="field"><label>Matrícula</label><input placeholder="👤 Matrícula"></div>
+            <div class="field"><label>Senha</label><input type="password" placeholder="🔒 Senha  [Mostrar]"></div>
+            <div id="login-erro" style="display:none; font-size:11px; color:#b91c1c;">Matrícula ou senha inválidos.</div>
+            <button class="btn primario" style="width:100%;" onclick="document.getElementById('login-erro').style.display='block'">Entrar</button>
+            <div class="hint" style="text-align:center;">Primeiro acesso ou problemas? Fale com a secretaria.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-note">Pós-login: coordenador/professor → <code class="inline">/ocorrencias</code> · aluno → <code class="inline">/meu-historico</code>. Removidos do Figma: "Manter conectado" e "Esqueci minha senha".</div>
+  </section>
+
+  <!-- ============ 02. OCORRÊNCIAS ============ -->
+  <section class="view" id="view-ocorrencias">
+    <div class="view-head">
+      <h2>02 · OcorrenciasPage — <code class="inline">/ocorrencias</code> · página principal</h2>
+      <div class="meta"><span class="badge-flag figma">figma: tabela + drawer</span> perfis: professor, coordenador · API: R04-R08, R12</div>
+    </div>
+    <div class="screen">
+      <div class="screen-bar">localhost:5173/ocorrencias</div>
+      <div class="app-header">
+        <div class="logo">OCORRÊNCIA+</div>
+        <div class="tabs-top"><span class="on">Ocorrências</span><span>Cadastros</span></div>
+        <div class="user">🧑 Marcio Roberio · coordenador ▾</div>
+      </div>
+      <div class="page-head">
+        <div><h3>Ocorrências</h3><div class="sub">48 registros</div></div>
+        <button class="btn primario" onclick="openOverlay('drawer-registrar')">+ Nova ocorrência</button>
+      </div>
+      <div style="padding: 0 16px;">
+        <div class="seg"><button class="on">Ativas · 32</button><button>Arquivadas · 16</button><button>Todas · 48</button></div>
+      </div>
+      <div class="filterbar">
+        <div class="field"><label>Aluno</label><input placeholder="🔎 Nome ou matrícula"></div>
+        <div class="field"><label>Turma</label><select><option>Todas</option></select></div>
+        <div class="field"><label>Tipo</label><select><option>Todos</option></select></div>
+        <div class="field"><label>Gravidade</label><select><option>Todas</option></select></div>
+        <div class="field"><label>Período</label><input placeholder="dd/mm — dd/mm"></div>
+        <button class="btn ghost">Limpar filtros</button>
+      </div>
+      <table class="wftable">
+        <thead><tr><th>Aluno</th><th>Ocorrência</th><th>Data</th><th>Gravidade</th><th>Situação</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="avatar">AS</span>Alana Sofia · 3º Ano</td>
+            <td>Uso indevido de celular — "Utilizou o celular durante a aula..."</td>
+            <td>12/05/2026</td>
+            <td><span class="pill leve">● Leve</span></td>
+            <td><span class="pill ativa">Ativa</span></td>
+            <td style="position:relative; text-align:right;"><span class="menu-dots" onclick="toggleDropdown('menu-1')">⋮</span>
+              <div class="dropdown" id="menu-1">
+                <button onclick="openOverlay('dialog-detalhe')">Ver detalhes</button>
+                <button onclick="openOverlay('dialog-arquivar')">Arquivar</button>
+                <button onclick="openOverlay('drawer-registrar')">Registrar correção</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="avatar">EB</span>Enzo Gabriel · 3º Ano</td>
+            <td>Indisciplina — "Conversou durante a explicação..."</td>
+            <td>10/05/2026</td>
+            <td><span class="pill media">● Média</span></td>
+            <td><span class="pill ativa">Ativa</span></td>
+            <td style="text-align:right;"><span class="menu-dots">⋮</span></td>
+          </tr>
+          <tr>
+            <td><span class="avatar">LR</span>Lucas Rafael · 3º Ano</td>
+            <td>Dano ao patrimônio — "Danificou a carteira..."</td>
+            <td>02/05/2026</td>
+            <td><span class="pill grave">● Grave</span></td>
+            <td><span class="pill arquivada">Arquivada</span></td>
+            <td style="text-align:right;"><span class="menu-dots">⋮</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pager"><span>Exibindo 1-10 de 48 registros</span><span><button class="btn" disabled>‹ Anterior</button> <button class="btn">Próxima ›</button></span></div>
+    </div>
+    <div class="flow-note">O drawer de registro é "o componente mais importante do frontend" (Design.md §4.5). Clique em <b>+ Nova ocorrência</b> ou em <b>Registrar correção</b> pra ver.</div>
+  </section>
+
+  <!-- ============ 03. ALUNOS ============ -->
+  <section class="view" id="view-alunos">
+    <div class="view-head">
+      <h2>03 · AlunosPage — <code class="inline">/alunos</code></h2>
+      <div class="meta"><span class="badge-flag figma">figma: "Cadastros → Alunos"</span> perfis: professor, coordenador · API: R11, R12, R13, R09</div>
+    </div>
+    <div class="screen">
+      <div class="screen-bar">localhost:5173/alunos</div>
+      <div class="app-header">
+        <div class="logo">OCORRÊNCIA+</div>
+        <div class="tabs-top"><span>Ocorrências</span><span class="on">Alunos</span></div>
+        <div class="user">🧑 Thiago Oliveira · professor ▾</div>
+      </div>
+      <div class="page-head">
+        <div><h3>Alunos — Turma 3º Ano</h3><div class="sub">22 alunos · breadcrumb: Cadastros &gt; Alunos</div></div>
+        <button class="btn primario" disabled title="só coordenador">+ Novo aluno</button>
+      </div>
+      <div class="filterbar">
+        <div class="field"><label>Buscar</label><input placeholder="🔎 Nome ou matrícula"></div>
+        <div class="field"><label>Turma</label><select><option>3º Ano</option></select></div>
+        <div class="field"><label>Ordenar</label><select><option>Nome A-Z</option></select></div>
+      </div>
+      <div class="two-col">
+        <div class="wf"><span class="tag">AlunosTable</span>
+          <table class="wftable">
+            <thead><tr><th>Aluno</th><th>Matrícula</th><th>Ocorrências</th><th>Última</th><th></th></tr></thead>
+            <tbody>
+              <tr onclick="document.getElementById('resumo-painel').style.display='block'" style="cursor:pointer;">
+                <td><span class="avatar">AS</span>Alana Sofia Mendonça</td><td>2024308532</td><td>3</td><td>12/05/2026</td><td style="text-align:right;">⋮</td>
+              </tr>
+              <tr><td><span class="avatar">EB</span>Enzo Gabriel Pimentel</td><td>2024308612</td><td>0</td><td>—</td><td style="text-align:right;">⋮</td></tr>
+              <tr><td><span class="avatar">LR</span>Lucas Rafael Neves</td><td>2024309674</td><td>1</td><td>01/03/2026</td><td style="text-align:right;">⋮</td></tr>
+            </tbody>
+          </table>
+          <div class="pager"><span>Exibindo 1-10 de 22 alunos</span><span><button class="btn" disabled>‹</button> <button class="btn">›</button></span></div>
+        </div>
+        <div class="wf" id="resumo-painel"><span class="tag">AlunoResumoPanel</span>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;"><span class="avatar" style="width:36px;height:36px;font-size:13px;">AS</span><div><b style="font-size:13px;">Alana Sofia Mendonça</b><div class="hint">Matrícula 2024308532 · 3º Ano</div></div></div>
+          <div class="stat-row">
+            <div class="stat-tile"><div class="num">3</div><div class="lbl">Ativas</div></div>
+            <div class="stat-tile"><div class="num">0</div><div class="lbl">Graves</div></div>
+            <div class="stat-tile"><div class="num">1</div><div class="lbl">Arquivadas</div></div>
+          </div>
+          <div style="margin-top:10px;"><div class="hint" style="margin-bottom:4px;">Histórico recente</div>
+            <div class="recent-item"><span>● Leve — Uso de celular</span><span>12/05</span></div>
+            <div class="recent-item"><span>● Média — Atraso recorrente</span><span>28/04</span></div>
+            <div class="recent-item"><span>● Leve — Uniforme</span><span>15/04</span></div>
+          </div>
+          <div style="display:flex; gap:6px; margin-top:12px;">
+            <button class="btn primario" style="flex:1;" onclick="openOverlay('drawer-registrar')">Registrar ocorrência</button>
+            <button class="btn" style="flex:1;" onclick="go('ficha-aluno')">Ver ficha completa</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-note">Clique numa linha da tabela pra simular a seleção e abrir o <code class="inline">AlunoResumoPanel</code> à direita.</div>
+  </section>
+
+  <!-- ============ 04. FICHA DO ALUNO ============ -->
+  <section class="view" id="view-ficha-aluno">
+    <div class="view-head">
+      <h2>04 · FichaAlunoPage — <code class="inline">/alunos/:id</code></h2>
+      <div class="meta"><span class="badge-flag proto">a prototipar — sem frame no Figma</span> perfis: professor, coordenador · API: R13, R09</div>
+    </div>
+    <div class="screen">
+      <div class="screen-bar">localhost:5173/alunos/2024308532</div>
+      <div class="app-header">
+        <div class="logo">OCORRÊNCIA+</div>
+        <div class="tabs-top"><span>Ocorrências</span><span class="on">Alunos</span></div>
+        <div class="user">🧑 Thiago Oliveira · professor ▾</div>
+      </div>
+      <div class="wf"><span class="tag">AlunoCabecalho</span>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <span class="avatar" style="width:46px;height:46px;font-size:15px;">AS</span>
+          <div><b style="font-size:15px;">Alana Sofia Mendonça Ribeiro Trajano</b><div class="hint">Matrícula 2024308532 · Turma atual: 3º Ano</div></div>
+          <div class="stat-row" style="flex:1; max-width:380px; margin-left:20px;">
+            <div class="stat-tile"><div class="num">3</div><div class="lbl">Ativas</div></div>
+            <div class="stat-tile"><div class="num">0</div><div class="lbl">Graves</div></div>
+            <div class="stat-tile"><div class="num">1</div><div class="lbl">Arquivadas</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="padding: 0 16px;"><div class="seg"><button class="on">Ativas</button><button>Arquivadas</button><button>Todas</button></div></div>
+      <div class="filterbar">
+        <div class="field"><label>Tipo</label><select><option>Todos</option></select></div>
+        <div class="field"><label>Gravidade</label><select><option>Todas</option></select></div>
+        <div class="field"><label>Período</label><input placeholder="dd/mm — dd/mm"></div>
+      </div>
+      <table class="wftable">
+        <thead><tr><th>Ocorrência</th><th>Data</th><th>Turma registrada</th><th>Gravidade</th><th>Situação</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Uso indevido de celular</td><td>12/05/2026</td><td>3º Ano</td><td><span class="pill leve">● Leve</span></td><td><span class="pill ativa">Ativa</span></td><td style="text-align:right;">⋮</td></tr>
+          <tr><td>Atraso recorrente</td><td>28/04/2026</td><td>3º Ano</td><td><span class="pill media">● Média</span></td><td><span class="pill ativa">Ativa</span></td><td style="text-align:right;">⋮</td></tr>
+          <tr><td>Fardamento incorreto</td><td>15/01/2026</td><td><b>9º B</b></td><td><span class="pill leve">● Leve</span></td><td><span class="pill arquivada">Arquivada</span></td><td style="text-align:right;">⋮</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="rn5-note"><b>RN5 — note a 3ª linha:</b> a coluna é "Turma registrada" (não a atual). A ocorrência de 15/01 foi registrada quando a aluna ainda estava no 9º B — mesmo tendo sido transferida depois pro 3º Ano, essa linha nunca muda. Sem a coluna ALUNO (óbvio: é a ficha dela).</div>
+  </section>
+
+  <!-- ============ 05. CADASTROS ============ -->
+  <section class="view" id="view-cadastros">
+    <div class="view-head">
+      <h2>05 · CadastrosPage — <code class="inline">/cadastros</code></h2>
+      <div class="meta"><span class="badge-flag proto">a prototipar — sem frame no Figma</span> perfil: só coordenador · API: R11, R14-R19</div>
+    </div>
+    <div class="screen">
+      <div class="screen-bar">localhost:5173/cadastros</div>
+      <div class="app-header">
+        <div class="logo">OCORRÊNCIA+</div>
+        <div class="tabs-top"><span>Ocorrências</span><span class="on">Cadastros</span></div>
+        <div class="user">🧑 Marcio Roberio · coordenador ▾</div>
+      </div>
+      <div style="padding: 14px 16px 0;"><div class="tabs">
+        <div class="tab" onclick="cadTab('alunos')" id="cadtab-alunos">Alunos</div>
+        <div class="tab on" onclick="cadTab('turmas')" id="cadtab-turmas">Turmas</div>
+        <div class="tab" onclick="cadTab('vinculos')" id="cadtab-vinculos">Vínculos</div>
+      </div></div>
+
+      <div id="cadpane-alunos" style="display:none; padding:14px;">
+        <div class="hint">Reaproveita a <code class="inline">AlunosPage</code> inteira (seção 03) — mesma tabela, mesmo painel lateral, com <b>+ Novo aluno</b> habilitado aqui porque é coordenador.</div>
+      </div>
+
+      <div id="cadpane-turmas" style="padding:14px;">
+        <div class="wf"><span class="tag">TurmasTable</span>
+          <div style="display:flex; justify-content:flex-end; margin-bottom:8px;"><button class="btn primario" onclick="openOverlay('dialog-turma')">+ Nova turma</button></div>
+          <table class="wftable">
+            <thead><tr><th>Turma</th><th>Nº de alunos</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>3º Ano</td><td>22</td><td style="text-align:right;">⋮</td></tr>
+              <tr><td>9º B</td><td>1</td><td style="text-align:right;">⋮</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="cadpane-vinculos" style="display:none; padding:14px;">
+        <div class="wf"><span class="tag">VinculosPanel</span>
+          <div class="ctl-row" style="margin-bottom:10px;">
+            <div class="field"><label>Turma</label><select><option>3º Ano</option><option>9º B</option></select></div>
+          </div>
+          <table class="wftable">
+            <thead><tr><th>Professor vinculado</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Thiago Oliveira</td><td style="text-align:right;"><button class="btn">Desvincular</button></td></tr>
+              <tr><td>Osvaldo Pife</td><td style="text-align:right;"><button class="btn">Desvincular</button></td></tr>
+            </tbody>
+          </table>
+          <div class="ctl-row" style="margin-top:12px;">
+            <div class="field" style="flex:1;"><label>Vincular professor</label><select><option>Marici Lopes</option></select></div>
+            <button class="btn primario" style="margin-top:17px;">Vincular</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-note">Alterne as abas acima. A aba <b>Alunos</b> aqui é literalmente a página 03 — não é um componente novo, é reaproveitamento.</div>
+  </section>
+
+  <!-- ============ 06. MEU HISTÓRICO ============ -->
+  <section class="view" id="view-meu-historico">
+    <div class="view-head">
+      <h2>06 · MeuHistoricoPage — <code class="inline">/meu-historico</code></h2>
+      <div class="meta"><span class="badge-flag proto">a prototipar — sem frame no Figma</span> perfil: só aluno · API: R10, R06</div>
+    </div>
+    <div class="screen">
+      <div class="screen-bar">localhost:5173/meu-historico</div>
+      <div class="app-header">
+        <div class="logo">OCORRÊNCIA+</div>
+        <div class="tabs-top"><span class="on">Meu histórico</span></div>
+        <div class="user">🧑 Alana Sofia · aluno ▾</div>
+      </div>
+      <div class="page-head"><div><h3>Meu histórico</h3></div></div>
+      <div style="padding: 0 16px;"><div class="seg"><button class="on">Ativas</button><button>Arquivadas</button><button>Todas</button></div></div>
+      <div class="filterbar">
+        <div class="field"><label>Tipo</label><select><option>Todos</option></select></div>
+        <div class="field"><label>Gravidade</label><select><option>Todas</option></select></div>
+        <div class="field"><label>Período</label><input placeholder="dd/mm — dd/mm"></div>
+      </div>
+      <table class="wftable">
+        <thead><tr><th>Data</th><th>Tipo</th><th>Gravidade</th><th>Descrição</th><th>Situação</th></tr></thead>
+        <tbody>
+          <tr onclick="openOverlay('dialog-detalhe')" style="cursor:pointer;"><td>12/05/2026</td><td>Uso indevido de celular</td><td><span class="pill leve">● Leve</span></td><td>Utilizou o celular durante a aula...</td><td><span class="pill ativa">Ativa</span></td></tr>
+          <tr><td>28/04/2026</td><td>Atraso</td><td><span class="pill media">● Média</span></td><td>Chegou atrasado após o intervalo...</td><td><span class="pill ativa">Ativa</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="flow-note"><b>Sem menu de ações (⋮)</b> — é só leitura. O aluno clica numa linha pra ver o detalhe (mesmo <code class="inline">OcorrenciaDetalheDialog</code> das outras páginas), e não há nenhum botão de registrar/arquivar.</div>
+  </section>
+
+  <!-- ============ 07. PAINEL (fase 3) ============ -->
+  <section class="view" id="view-painel">
+    <div class="view-head">
+      <h2>07 · PainelPage — <code class="inline">/painel</code> <span class="badge-flag fase3">fase 3 — implementar por último</span></h2>
+      <div class="meta"><span class="badge-flag figma">figma: cards simplificados</span> perfil: só coordenador · API: R20, R21</div>
+    </div>
+    <div class="screen">
+      <div class="screen-bar">localhost:5173/painel</div>
+      <div class="page-head"><div><h3>Painel</h3></div><div class="field"><label>Período</label><select><option>30 dias</option><option>60 dias</option><option>90 dias</option></select></div></div>
+      <div style="display:flex; gap:10px; padding: 0 10px;">
+        <div class="wf" style="flex:1;"><span class="tag">TurmaCard</span>
+          <b>3º Ano</b><div class="hint">12 ativas</div>
+          <div style="display:flex; height:8px; border-radius:4px; overflow:hidden; margin:8px 0;"><div style="flex:6; background:#1f7a47;"></div><div style="flex:4; background:#a15c07;"></div><div style="flex:2; background:#b91c1c;"></div></div>
+          <a href="#" style="font-size:11px;">Ver ocorrências da turma →</a>
+        </div>
+        <div class="wf" style="flex:1;"><span class="tag">TurmaCard</span>
+          <b>9º B</b><div class="hint">1 ativa</div>
+          <div style="display:flex; height:8px; border-radius:4px; overflow:hidden; margin:8px 0;"><div style="flex:1; background:#1f7a47;"></div></div>
+          <a href="#" style="font-size:11px;">Ver ocorrências da turma →</a>
+        </div>
+      </div>
+      <div class="wf"><span class="tag">AlunosEmAtencaoList</span>
+        <table class="wftable">
+          <thead><tr><th>Aluno</th><th>Turma</th><th>Ocorrências</th><th>Graves</th></tr></thead>
+          <tbody><tr><td>Exemplo Aluno</td><td>3º Ano</td><td>5</td><td>3</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="flow-note">Regra: <code class="inline">graves &gt;= 3</code> ou <code class="inline">totalAtivas &gt;= 5</code>; arquivadas e "destaque positivo" não contam. Só começar depois do checkpoint do núcleo (Tarefa 2.11).</div>
+  </section>
+
+</main>
+
+<!-- ===================== OVERLAYS (globais, fora das views) ===================== -->
+<div class="scrim" id="scrim" onclick="closeAllOverlays()"></div>
+
+<div class="drawer" id="drawer-registrar">
+  <div class="d-head"><h4>Registrar ocorrência</h4><span class="x" onclick="closeAllOverlays()">✕</span></div>
+  <div class="d-body">
+    <div class="hint">Campos com * são obrigatórios.</div>
+    <div class="field"><label>Aluno(a) *</label><input placeholder="Buscar por nome ou matrícula"></div>
+    <div class="field"><label>Tipo *</label><select><option>Selecione...</option><option>Atraso</option><option>Indisciplina</option><option>Uso indevido de celular</option><option>Dano ao patrimônio</option><option>Destaque positivo</option></select></div>
+    <div class="field"><label>Data do ocorrido *</label><input placeholder="dd/mm/aaaa" value="16/11/2026"></div>
+    <div class="field"><label>Gravidade * (sem pré-seleção)</label>
+      <div class="seg" id="seg-gravidade">
+        <button onclick="segPick(this)">● Leve</button><button onclick="segPick(this)">● Média</button><button onclick="segPick(this)">● Grave</button>
+      </div>
+    </div>
+    <div class="field"><label>Descrição * <span style="float:right;">0/500</span></label><textarea rows="4" placeholder="Descreva o ocorrido..."></textarea></div>
+  </div>
+  <div class="d-foot"><button class="btn" onclick="closeAllOverlays()">Cancelar</button><button class="btn primario">Salvar registro</button></div>
+</div>
+
+<div class="dialog" id="dialog-arquivar">
+  <div class="d-head"><h4>Arquivar ocorrência</h4><span class="x" onclick="closeAllOverlays()">✕</span></div>
+  <div class="d-body">
+    <div class="field"><label>Motivo * <span style="float:right;">0/500</span></label><textarea rows="3" placeholder="Por que esta ocorrência está sendo arquivada?"></textarea></div>
+  </div>
+  <div class="d-foot"><button class="btn" onclick="closeAllOverlays()">Cancelar</button><button class="btn primario">Arquivar</button></div>
+</div>
+
+<div class="dialog" id="dialog-detalhe">
+  <div class="d-head"><h4>Detalhe da ocorrência</h4><span class="x" onclick="closeAllOverlays()">✕</span></div>
+  <div class="d-body">
+    <div class="kv"><span>Aluno</span><span>Alana Sofia Mendonça</span></div>
+    <div class="kv"><span>Turma registrada</span><span>3º Ano</span></div>
+    <div class="kv"><span>Tipo</span><span>Uso indevido de celular</span></div>
+    <div class="kv"><span>Gravidade</span><span><span class="pill leve">● Leve</span></span></div>
+    <div class="kv"><span>Data</span><span>12/05/2026</span></div>
+    <div class="kv"><span>Descrição</span><span style="text-align:right; max-width:220px;">Utilizou o celular durante a aula.</span></div>
+    <div class="kv"><span>Registrado por</span><span>Marcio Roberio</span></div>
+    <div class="kv" style="border-bottom:none;"><span>Situação</span><span><span class="pill ativa">Ativa</span></span></div>
+  </div>
+  <div class="d-foot"><button class="btn" onclick="closeAllOverlays()">Fechar</button></div>
+</div>
+
+<div class="dialog" id="dialog-turma">
+  <div class="d-head"><h4>Nova turma</h4><span class="x" onclick="closeAllOverlays()">✕</span></div>
+  <div class="d-body">
+    <div class="field"><label>Nome *</label><input placeholder="ex.: 9º B" maxlength="30"></div>
+    <div class="hint">Erro possível: "Já existe uma turma com este nome."</div>
+  </div>
+  <div class="d-foot"><button class="btn" onclick="closeAllOverlays()">Cancelar</button><button class="btn primario">Criar turma</button></div>
+</div>
+
+<script>
+  function go(name) { window.location.hash = name; }
+
+  function render() {
+    const hash = (window.location.hash || '#intro').slice(1);
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('ativo'));
+    document.querySelectorAll('nav.sidebar a').forEach(a => a.classList.remove('ativo'));
+    const view = document.getElementById('view-' + hash) || document.getElementById('view-intro');
+    view.classList.add('ativo');
+    const link = document.querySelector('nav.sidebar a[data-view="' + hash + '"]');
+    if (link) link.classList.add('ativo');
+    closeAllOverlays();
+    document.querySelector('main.stage').scrollTop = 0;
+  }
+  window.addEventListener('hashchange', render);
+  window.addEventListener('DOMContentLoaded', render);
+
+  function openOverlay(id) {
+    document.getElementById('scrim').classList.add('show');
+    document.getElementById(id).classList.add('show');
+  }
+  function closeAllOverlays() {
+    document.getElementById('scrim').classList.remove('show');
+    document.querySelectorAll('.drawer, .dialog').forEach(el => el.classList.remove('show'));
+    document.querySelectorAll('.dropdown').forEach(el => el.classList.remove('show'));
+  }
+  function toggleDropdown(id) {
+    const el = document.getElementById(id);
+    const open = el.classList.contains('show');
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('show'));
+    if (!open) el.classList.add('show');
+  }
+  function segPick(btn) {
+    btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+  function cadTab(name) {
+    ['alunos','turmas','vinculos'].forEach(t => {
+      document.getElementById('cadpane-' + t).style.display = (t === name) ? 'block' : 'none';
+      document.getElementById('cadtab-' + t).classList.toggle('on', t === name);
+    });
+  }
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.menu-dots')) document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('show'));
+  });
+</script>
+
+</body>
+</html>
