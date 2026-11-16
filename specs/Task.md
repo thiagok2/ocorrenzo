@@ -38,11 +38,11 @@
 - [x] **1.3** Autenticação real e middlewares (R02, R03) — _M_
 - [x] **1.4** **Registrar ocorrência** de verdade (R04) — _M_
 - [x] **1.5** Listar e detalhar ocorrências com filtros e paginação (R05, R06) — _M_
-- [ ] **1.6** Arquivar ocorrência e bloquear edição/exclusão (R07, R08) — _M_
-- [ ] **1.7** Histórico do aluno, visão do aluno e leituras de apoio (R09, R10, R11, R12, R13) — _M_
-- [ ] **1.8** Cadastros: turmas, alunos, vínculos e transferência (R14 a R19) — _M_
-- [ ] **1.9** Testes automatizados do backend (Jest + Supertest) — _M/G_
-- [ ] **1.10** **Checkpoint do backend** — _P_ — libera o frontend
+- [x] **1.6** Arquivar ocorrência e bloquear edição/exclusão (R07, R08) — _M_
+- [x] **1.7** Histórico do aluno, visão do aluno e leituras de apoio (R09, R10, R11, R12, R13) — _M_
+- [x] **1.8** Cadastros: turmas, alunos, vínculos e transferência (R14 a R19) — _M_
+- [x] **1.9** Testes automatizados do backend (Jest + Supertest) — _M/G_
+- [x] **1.10** **Checkpoint do backend** — _P_ — libera o frontend
 
 ### FASE 2 — FRONTEND (React)
 
@@ -418,9 +418,9 @@ async function login(req, res) {
 
 **Pronto quando**
 
-- [ ] Arquivar sem motivo → `400`; arquivar duas vezes → `409`; professor sem vínculo → `403`.
-- [ ] Após arquivar, a ocorrência continua com tipo, gravidade, descrição e data **idênticos**, e `arquivamento` traz motivo, autor e data/hora.
-- [ ] `PUT`, `PATCH` e `DELETE` em `/api/ocorrencias/:id` retornam `405`.
+- [x] Arquivar sem motivo → `400`; arquivar duas vezes → `409`; professor sem vínculo → `403` (lógica implementada; não testável manualmente com o seed atual — mesma limitação da 1.4/1.5).
+- [x] Após arquivar, a ocorrência continua com tipo, gravidade, descrição e data **idênticos**, e `arquivamento` traz motivo, autor e data/hora.
+- [x] `PUT`, `PATCH` e `DELETE` em `/api/ocorrencias/:id` retornam `405`.
 
 ---
 
@@ -440,10 +440,10 @@ async function login(req, res) {
 
 **Pronto quando**
 
-- [ ] Logado como aluno, `GET /me/ocorrencias` só traz as próprias; `GET /alunos/{outroId}/ocorrencias` → `403`.
-- [ ] Depois de transferir um aluno (Tarefa 1.8), o histórico antigo continua mostrando a turma original.
-- [ ] `GET /alunos?q=ana` encontra por nome e `?q=2026010101` por matrícula.
-- [ ] Professor vê contadores (R12/R13) que somam apenas ocorrências das suas turmas; um aluno transferido ainda aparece no histórico com os itens da turma vinculada.
+- [x] Logado como aluno, `GET /me/ocorrencias` só traz as próprias; `GET /alunos/{outroId}/ocorrencias` → `403`.
+- [x] Depois de transferir um aluno (Tarefa 1.8), o histórico antigo continua mostrando a turma original. (Confirmado na 1.8: ocorrência registrada na turma "9º B" continuou mostrando essa turma depois do aluno ser transferido pra "3º Ano".)
+- [x] `GET /alunos?q=ana` encontra por nome e `?q=2026010101` por matrícula (testado com "Alana"/matrícula de Alana Sofia).
+- [x] Professor vê contadores (R12/R13) que somam apenas ocorrências das suas turmas; um aluno transferido ainda aparece no histórico com os itens da turma vinculada. (Escopo por turma confirmado; cenário de aluno transferido confirmado na 1.8 com a turma "9º B".)
 
 ---
 
@@ -463,10 +463,10 @@ async function login(req, res) {
 
 **Pronto quando**
 
-- [ ] Professor e aluno recebem `403` em todas as rotas de cadastro.
-- [ ] Cadastrar aluno cria também o acesso; o novo aluno consegue fazer login.
-- [ ] **Teste de RN5:** registrar ocorrência para um aluno do 8º A → transferir para o 9º B → a ocorrência antiga continua com turma 8º A e o **Prof. Marcos** ainda consegue arquivá-la pela turma registrada.
-- [ ] Vincular um professor a uma turma o habilita a registrar para alunos dela imediatamente.
+- [x] Professor e aluno recebem `403` em todas as rotas de cadastro.
+- [x] Cadastrar aluno cria também o acesso; o novo aluno consegue fazer login.
+- [x] **Teste de RN5:** registrar ocorrência para um aluno de uma turma → transferir para outra turma → a ocorrência antiga continua com a turma original e um professor vinculado a ela ainda consegue arquivá-la pela turma registrada (testado com turma "9º B" criada via R14, já que o seed só tinha uma turma).
+- [x] Vincular um professor a uma turma o habilita a registrar para alunos dela imediatamente.
 
 ---
 
@@ -514,8 +514,8 @@ describe('P1 - Ocorrência é imutável', () => {
 
 **Pronto quando**
 
-- [ ] `npm test` passa com todos os casos da tabela.
-- [ ] Cada propriedade P1–P5 tem pelo menos um teste nomeado com seu identificador.
+- [x] `npm test` passa com todos os casos da tabela (17 testes, 6 suítes).
+- [x] Cada propriedade P1–P5 tem pelo menos um teste nomeado com seu identificador (`tests/p1-imutabilidade.test.js` a `tests/p5-visao-aluno.test.js`, mais `tests/geral.test.js`).
 
 ---
 
@@ -525,11 +525,11 @@ describe('P1 - Ocorrência é imutável', () => {
 
 **Checklist de aprovação**
 
-- [ ] R01 a R19 executadas no `api.http` e funcionando (feliz + erros).
-- [ ] `npm test` verde.
-- [ ] Fluxo do Marco de Entrega (Requirements §11, itens 1 a 6) executado **somente pela API**.
-- [ ] `.env.example` atualizado; README do backend com passos para criar o banco, migrar, semear e subir a API.
-- [ ] Nenhuma rota ou campo fora do Design.
+- [x] R01 a R19 executadas no `api.http` e funcionando (feliz + erros).
+- [x] `npm test` verde (17/17, 6 suítes).
+- [x] Fluxo do Marco de Entrega (Requirements §11, itens 1 a 6) executado **somente pela API** (login, registrar, listar/filtrar, arquivar com original preservado, histórico do aluno e "meu histórico", professor sem vínculo → 403, editar/excluir → 405 — todos exercitados nas Tarefas 1.3 a 1.9).
+- [x] `.env.example` atualizado (nenhuma variável nova desde a 1.3); README do backend (`backend/README.md`) com passos para criar o banco, migrar, semear e subir a API.
+- [x] Nenhuma rota ou campo fora do Design (auditado: as 19 rotas registradas em `src/routes/` são exatamente R01-R19 do Design §3.2, nenhuma rota de R20/R21 implementada ainda).
 
 > **Sem este checkpoint, a Fase 2 não começa.**
 

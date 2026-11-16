@@ -1,5 +1,4 @@
 @base = http://localhost:3333/api
-@ocorrenciaId = 7a2e9c44-51b3-4f6e-8c2d-0e3f6a1b9d55
 @alunoId = ca62d2a6-d5e9-4f45-b73e-bee68fc10e59
 
 ### R01 - health
@@ -190,28 +189,274 @@ Content-Type: application/json
 GET {{base}}/ocorrencias/{{ocorrenciaIdReal}}
 Authorization: Bearer {{tokenOutroAluno}}
 
-### R07 - arquivar ocorrência
-POST {{base}}/ocorrencias/{{ocorrenciaId}}/arquivamento
+### R07 - arquivar sem motivo (deve retornar 400 VALIDACAO)
+POST {{base}}/ocorrencias/{{ocorrenciaIdReal}}/arquivamento
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}
+
+### R07 - arquivar ocorrência (caminho feliz) — 200, tipo/gravidade/descrição/data IDÊNTICOS
+POST {{base}}/ocorrencias/{{ocorrenciaIdReal}}/arquivamento
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 { "motivo": "Registro lançado no aluno errado." }
 
-### R08 - tentativa de editar (deve retornar 405)
-PATCH {{base}}/ocorrencias/{{ocorrenciaId}}
+### R07 - arquivar de novo a mesma ocorrência (deve retornar 409 CONFLITO)
+POST {{base}}/ocorrencias/{{ocorrenciaIdReal}}/arquivamento
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "motivo": "Tentando arquivar outra vez." }
+
+### R07 - aluno tentando arquivar (deve retornar 403, pelo autorizarPerfil)
+POST {{base}}/ocorrencias/{{ocorrenciaIdReal}}/arquivamento
+Authorization: Bearer {{tokenAluno}}
+Content-Type: application/json
+
+{ "motivo": "Aluno tentando arquivar." }
+
+### R07 - ocorrência inexistente (deve retornar 404 NAO_ENCONTRADO)
+POST {{base}}/ocorrencias/00000000-0000-4000-8000-000000000000/arquivamento
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "motivo": "Qualquer motivo." }
+
+### Confirmar que o arquivamento não alterou o resto da ocorrência (RN1)
+GET {{base}}/ocorrencias/{{ocorrenciaIdReal}}
+Authorization: Bearer {{token}}
+
+### R08 - tentativa de editar uma ocorrência arquivada (deve retornar 405)
+PATCH {{base}}/ocorrencias/{{ocorrenciaIdReal}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 { "descricao": "tentando alterar" }
 
-### R08 - tentativa de excluir (deve retornar 405)
-DELETE {{base}}/ocorrencias/{{ocorrenciaId}}
+### R08 - tentativa de excluir uma ocorrência arquivada (deve retornar 405)
+DELETE {{base}}/ocorrencias/{{ocorrenciaIdReal}}
 Authorization: Bearer {{token}}
 
-### R09 - histórico de ocorrências de um aluno
+### R09 - histórico de ocorrências de um aluno (coordenador) — 200, inclui turmaAtual
 GET {{base}}/alunos/{{alunoId}}/ocorrencias
 Authorization: Bearer {{token}}
 
-### R10 - meu histórico (perfil aluno)
+### R09 - aluno titular vendo o próprio histórico pela rota de alunos — 200
+GET {{base}}/alunos/{{alunoId}}/ocorrencias
+Authorization: Bearer {{tokenAluno}}
+
+### R09 - outro aluno tentando ver o histórico de Alana — 403 ACESSO_NEGADO
+GET {{base}}/alunos/{{alunoId}}/ocorrencias
+Authorization: Bearer {{tokenOutroAluno}}
+
+### R09 - aluno inexistente — 404 NAO_ENCONTRADO
+GET {{base}}/alunos/00000000-0000-4000-8000-000000000000/ocorrencias
+Authorization: Bearer {{token}}
+
+### R10 - meu histórico (perfil aluno) — 200, mesmo conteúdo do R09 acima
+GET {{base}}/me/ocorrencias
+Authorization: Bearer {{tokenAluno}}
+
+### R10 - coordenador não pode usar /me/ocorrencias — 403 (rota é só para aluno)
 GET {{base}}/me/ocorrencias
 Authorization: Bearer {{token}}
+
+### R11 - listar turmas (coordenador) — 200
+GET {{base}}/turmas
+Authorization: Bearer {{token}}
+
+### R11 - aluno não pode listar turmas — 403
+GET {{base}}/turmas
+Authorization: Bearer {{tokenAluno}}
+
+### R12 - listar alunos (coordenador, sem filtro) — 200 com totalOcorrenciasAtivas/ultimaOcorrenciaEm
+GET {{base}}/alunos
+Authorization: Bearer {{token}}
+
+### R12 - listar alunos com busca por nome
+GET {{base}}/alunos?q=Alana
+Authorization: Bearer {{token}}
+
+### R12 - listar alunos com busca por matrícula
+GET {{base}}/alunos?q=2024308532
+Authorization: Bearer {{token}}
+
+### R12 - aluno não pode listar alunos — 403
+GET {{base}}/alunos
+Authorization: Bearer {{tokenAluno}}
+
+### R13 - detalhar aluno (coordenador) — 200 com resumo
+GET {{base}}/alunos/{{alunoId}}
+Authorization: Bearer {{token}}
+
+### R13 - aluno titular vendo o próprio cadastro — 200
+GET {{base}}/alunos/{{alunoId}}
+Authorization: Bearer {{tokenAluno}}
+
+### R13 - outro aluno tentando ver o cadastro de Alana — 403
+GET {{base}}/alunos/{{alunoId}}
+Authorization: Bearer {{tokenOutroAluno}}
+
+### R13 - aluno inexistente — 404
+GET {{base}}/alunos/00000000-0000-4000-8000-000000000000
+Authorization: Bearer {{token}}
+
+### R14 - login como professor (Thiago Oliveira) — para os testes de 403 abaixo
+# @name loginProfessor
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "matricula": "2026000002", "senha": "senha123" }
+
+@tokenProfessor = {{loginProfessor.response.body.$.token}}
+
+### R14 - criar turma (coordenador) — 201
+# @name criarTurma
+POST {{base}}/turmas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nome": "9º B" }
+
+@turmaNovaId = {{criarTurma.response.body.$.id}}
+
+### R14 - nome duplicado — 409 CONFLITO
+POST {{base}}/turmas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nome": "9º B" }
+
+### R14 - professor tentando criar turma — 403
+POST {{base}}/turmas
+Authorization: Bearer {{tokenProfessor}}
+Content-Type: application/json
+
+{ "nome": "Outra" }
+
+### R15 - criar aluno (cria também o acesso de login) — 201
+# @name criarAluno
+POST {{base}}/alunos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nome": "Aluno Novo Teste", "matricula": "7000000001", "turmaId": "{{turmaNovaId}}" }
+
+@alunoNovoId = {{criarAluno.response.body.$.id}}
+
+### R15 - matrícula duplicada — 409 CONFLITO
+POST {{base}}/alunos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nome": "Duplicado", "matricula": "7000000001", "turmaId": "{{turmaNovaId}}" }
+
+### R15 - turma inexistente — 404
+POST {{base}}/alunos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nome": "X", "matricula": "7000000002", "turmaId": "00000000-0000-4000-8000-000000000000" }
+
+### R15 - professor tentando criar aluno — 403
+POST {{base}}/alunos
+Authorization: Bearer {{tokenProfessor}}
+Content-Type: application/json
+
+{ "nome": "X", "matricula": "7000000003", "turmaId": "{{turmaNovaId}}" }
+
+### Confirmar que o aluno novo consegue logar com senha = matrícula
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "matricula": "7000000001", "senha": "7000000001" }
+
+### Teste de RN5 - registrar ocorrência pro aluno novo, ainda na turma nova
+# @name ocorrenciaAntesTransferencia
+POST {{base}}/ocorrencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "alunoId": "{{alunoNovoId}}", "tipo": "atraso", "gravidade": "leve", "descricao": "Antes da transferência.", "data": "2026-06-10" }
+
+@ocorrenciaRN5Id = {{ocorrenciaAntesTransferencia.response.body.$.id}}
+
+### R16 - transferir aluno pra turma "3º Ano" (turma real do seed) — 200
+PATCH {{base}}/alunos/{{alunoNovoId}}/turma
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "turmaId": "a9377ab7-77cb-473d-805b-4725d1e51445" }
+
+### R16 - transferir pra mesma turma de novo — 409 CONFLITO
+PATCH {{base}}/alunos/{{alunoNovoId}}/turma
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "turmaId": "a9377ab7-77cb-473d-805b-4725d1e51445" }
+
+### R16 - professor tentando transferir — 403
+PATCH {{base}}/alunos/{{alunoNovoId}}/turma
+Authorization: Bearer {{tokenProfessor}}
+Content-Type: application/json
+
+{ "turmaId": "{{turmaNovaId}}" }
+
+### Confirmar RN5 - a ocorrência antiga continua com a turma nova (registrada antes da transferência)
+GET {{base}}/ocorrencias/{{ocorrenciaRN5Id}}
+Authorization: Bearer {{token}}
+
+### R17 - listar professores (coordenador) — 200
+# @name listarProfessores
+GET {{base}}/professores
+Authorization: Bearer {{token}}
+
+@professorId = {{listarProfessores.response.body.$[0].id}}
+
+### R17 - professor tentando listar professores — 403
+GET {{base}}/professores
+Authorization: Bearer {{tokenProfessor}}
+
+### R18 - listar professores vinculados à turma nova (vazio) — 200
+GET {{base}}/turmas/{{turmaNovaId}}/professores
+Authorization: Bearer {{token}}
+
+### R19 - vincular professor à turma nova — 201
+POST {{base}}/turmas/{{turmaNovaId}}/professores
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "professorId": "{{professorId}}" }
+
+### R19 - vincular de novo (mesmo par) — 409 CONFLITO
+POST {{base}}/turmas/{{turmaNovaId}}/professores
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "professorId": "{{professorId}}" }
+
+### R19 - professor tentando vincular — 403
+POST {{base}}/turmas/{{turmaNovaId}}/professores
+Authorization: Bearer {{tokenProfessor}}
+Content-Type: application/json
+
+{ "professorId": "{{professorId}}" }
+
+### Confirmar que o vínculo habilita o registro imediatamente: criar aluno na turma nova
+# @name criarAlunoTurmaNova
+POST {{base}}/alunos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nome": "Aluno Turma Nova", "matricula": "7000000004", "turmaId": "{{turmaNovaId}}" }
+
+@alunoTurmaNovaId = {{criarAlunoTurmaNova.response.body.$.id}}
+
+### Com o vínculo do R19, o professor já consegue registrar na turma nova — 201
+POST {{base}}/ocorrencias
+Authorization: Bearer {{tokenProfessor}}
+Content-Type: application/json
+
+{ "alunoId": "{{alunoTurmaNovaId}}", "tipo": "atraso", "gravidade": "leve", "descricao": "Vínculo habilitou na hora.", "data": "2026-06-10" }

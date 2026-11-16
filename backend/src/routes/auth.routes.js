@@ -9,7 +9,8 @@ const router = Router();
 
 const limitarLogin = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: process.env.NODE_ENV === 'test' ? 10000 : 10, // suíte de testes faz muitos logins; limite real só vale fora de test
+
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) =>

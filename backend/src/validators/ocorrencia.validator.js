@@ -18,14 +18,25 @@ export const esquemaRegistro = Joi.object({
   referenciaId: Joi.string().uuid().allow(null),
 });
 
-export const esquemaListagem = Joi.object({
+export const esquemaArquivamento = Joi.object({
+  motivo: Joi.string().trim().min(1).max(500).required(),
+});
+
+const filtrosOcorrencia = {
   situacao: Joi.string().valid('ativas', 'arquivadas', 'todas').default('ativas'),
-  q: Joi.string().trim().allow(''),
-  turmaId: Joi.string().uuid(),
   tipo: Joi.string().valid(...TIPOS),
   gravidade: Joi.string().valid(...GRAVIDADES),
   dataInicio: Joi.date().iso().custom(paraDataISO),
   dataFim: Joi.date().iso().custom(paraDataISO),
   page: Joi.number().integer().min(1).default(1),
   pageSize: Joi.number().integer().min(1).max(50).default(10),
+};
+
+export const esquemaListagem = Joi.object({
+  ...filtrosOcorrencia,
+  q: Joi.string().trim().allow(''),
+  turmaId: Joi.string().uuid(),
 });
+
+// R09/R10 — mesmos filtros de período/situação, sem q/turmaId (o aluno já vem do path ou do token)
+export const esquemaHistoricoAluno = Joi.object(filtrosOcorrencia);

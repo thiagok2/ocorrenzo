@@ -1,8 +1,14 @@
-// R07 a R10 ainda simulados — serão trocados pela versão real nas tarefas 1.6 a 1.8
 import { Router } from 'express';
 import ocorrenciasRouter from './ocorrencias.routes.js';
+import alunosRouter from './alunos.routes.js';
+import turmasRouter from './turmas.routes.js';
+import professoresRouter from './professores.routes.js';
 import authRouter from './auth.routes.js';
 import autenticar from '../middlewares/autenticar.js';
+import autorizarPerfil from '../middlewares/autorizarPerfil.js';
+import validar from '../middlewares/validar.js';
+import { esquemaHistoricoAluno } from '../validators/ocorrencia.validator.js';
+import * as ocorrenciaController from '../controllers/ocorrencia.controller.js';
 import sequelize from '../database/connection.js';
 
 const router = Router();
@@ -20,17 +26,16 @@ router.use('/auth', authRouter); // R02 (público) e R03 (protegida dentro do pr
 
 router.use(autenticar); // a partir daqui, toda rota exige token válido
 
-router.use('/ocorrencias', ocorrenciasRouter); // R04 a R06 reais; R07 e R08 ainda com respostas simuladas
+router.use('/ocorrencias', ocorrenciasRouter); // R04 a R08 reais
+router.use('/alunos', alunosRouter); // R09, R12, R13, R15, R16 reais
+router.use('/turmas', turmasRouter); // R11, R14, R18, R19 reais
+router.use('/professores', professoresRouter); // R17 real
 
-router.get('/alunos/:id/ocorrencias', (req, res) => // R09
-  res.json({
-    aluno: { id: req.params.id, nome: 'Ana Clara Silva', turmaAtual: { id: 'c3a1d2f4-0000-4000-8000-000000000001', nome: '8º A' } },
-    itens: [],
-    total: 0,
-    page: 1,
-    pageSize: 10,
-  }));
-router.get('/me/ocorrencias', (req, res) => // R10
-  res.json({ itens: [], total: 0, page: 1, pageSize: 10 }));
+router.get(
+  '/me/ocorrencias',
+  autorizarPerfil('aluno'),
+  validar(esquemaHistoricoAluno, 'query'),
+  ocorrenciaController.meuHistorico,
+); // R10
 
 export default router;

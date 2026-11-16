@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import { Aluno, Ocorrencia } from '../models/index.js';
 import ErroApp from '../utils/ErroApp.js';
-import { podeAgirNaTurma, turmasPermitidas } from './escopo.service.js';
+import { podeAgirNaTurma, podeVerAluno, turmasPermitidas } from './escopo.service.js';
 
 const INCLUDES = [
   { association: 'aluno', attributes: ['id', 'nome', 'matricula', 'usuarioId'] },
@@ -9,6 +9,20 @@ const INCLUDES = [
   { association: 'autor', attributes: ['id', 'nome'] },
   { association: 'arquivador', attributes: ['id', 'nome'] },
 ];
+
+function montarFiltroPeriodo({ situacao, tipo, gravidade, dataInicio, dataFim }) {
+  const where = {};
+  if (situacao === 'ativas') where.arquivada = false;
+  else if (situacao === 'arquivadas') where.arquivada = true;
+  if (tipo) where.tipo = tipo;
+  if (gravidade) where.gravidade = gravidade;
+  if (dataInicio || dataFim) {
+    where.dataOcorrencia = {};
+    if (dataInicio) where.dataOcorrencia[Op.gte] = dataInicio;
+    if (dataFim) where.dataOcorrencia[Op.lte] = dataFim;
+  }
+  return where;
+}
 
 export async function registrar(usuario, dados) {
   const aluno = await Aluno.findByPk(dados.alunoId);
@@ -43,18 +57,8 @@ export async function registrar(usuario, dados) {
 }
 
 export async function listar(usuario, query) {
-  const { situacao, q, turmaId, tipo, gravidade, dataInicio, dataFim, page, pageSize } = query;
-
-  const where = {};
-  if (situacao === 'ativas') where.arquivada = false;
-  else if (situacao === 'arquivadas') where.arquivada = true;
-  if (tipo) where.tipo = tipo;
-  if (gravidade) where.gravidade = gravidade;
-  if (dataInicio || dataFim) {
-    where.dataOcorrencia = {};
-    if (dataInicio) where.dataOcorrencia[Op.gte] = dataInicio;
-    if (dataFim) where.dataOcorrencia[Op.lte] = dataFim;
-  }
+  const { q, turmaId, page, pageSize } = query;
+  const where = montarFiltroPeriodo(query);
 
   const permitidas = await turmasPermitidas(usuario);
   if (turmaId) {
@@ -102,4 +106,68 @@ export async function detalhar(usuario, id) {
   }
 
   return ocorrencia;
+}
+
+export async function arquivar(usuario, id, motivo) {
+  const ocorrencia = await Ocorrencia.findByPk(id);
+  if (!ocorrencia) throw new ErroApp(404, 'NAO_ENCONTRADO', 'Ocorrência não encontrada.');
+
+  if (!(await podeAgirNaTurma(usuario, ocorrencia.turmaId))) {
+    throw new ErroApp(403, 'ACESSO_NEGADO', 'Acesso restrito às turmas em que você leciona.');
+  }
+  if (ocorrencia.arquivada) throw new ErroApp(409, 'CONFLITO', 'Esta ocorrência já está arquivada.');
+
+  ocorrencia.arquivada = true;
+  ocorrencia.motivoArquivamento = motivo;
+  ocorrencia.arquivadoPor = usuario.id;
+  ocorrencia.arquivadoEm = new Date();
+  await ocorrencia.save(); // dispara o hook beforeUpdate (RN1): só campos de arquivamento podem mudar
+
+  return Ocorrencia.findByPk(ocorrencia.id, { include: INCLUDES });
+}
+
+async function montarHistorico(usuario, aluno, query) {
+  const where = { ...montarFiltroPeriodo(query), alunoId: aluno.id };
+
+  // o aluno vê todo o próprio histórico, sem restrição de turma; os demais perfis
+  // só veem os itens das turmas vinculadas (coordenador/apoio_pedagogico: todas)
+  if (usuario.perfil !== 'aluno') {
+    const permitidas = await turmasPermitidas(usuario);
+    if (permitidas !== null) where.turmaId = { [Op.in]: permitidas };
+  }
+
+  const { rows, count } = await Ocorrencia.findAndCountAll({
+    where,
+    include: INCLUDES,
+    order: [['dataOcorrencia', 'DESC'], ['criadoEm', 'DESC']],
+    limit: query.pageSize,
+    offset: (query.page - 1) * query.pageSize,
+  });
+
+  return {
+    aluno: { id: aluno.id, nome: aluno.nome, matricula: aluno.matricula, turmaAtual: { id: aluno.turma.id, nome: aluno.turma.nome } },
+    itens: rows,
+    total: count,
+    page: query.page,
+    pageSize: query.pageSize,
+  };
+}
+
+export async function historicoAluno(usuario, alunoId, query) {
+  const aluno = await Aluno.findByPk(alunoId, { include: [{ association: 'turma', attributes: ['id', 'nome'] }] });
+  if (!aluno) throw new ErroApp(404, 'NAO_ENCONTRADO', 'Aluno não encontrado.');
+
+  if (!(await podeVerAluno(usuario, aluno))) {
+    const mensagem = usuario.perfil === 'aluno' ? 'Acesso restrito ao próprio histórico.' : 'Acesso restrito às turmas em que você leciona.';
+    throw new ErroApp(403, 'ACESSO_NEGADO', mensagem);
+  }
+
+  return montarHistorico(usuario, aluno, query);
+}
+
+export async function meuHistorico(usuario, query) {
+  const aluno = await Aluno.findOne({ where: { usuarioId: usuario.id }, include: [{ association: 'turma', attributes: ['id', 'nome'] }] });
+  if (!aluno) throw new ErroApp(404, 'NAO_ENCONTRADO', 'Aluno não encontrado.');
+
+  return montarHistorico(usuario, aluno, query);
 }

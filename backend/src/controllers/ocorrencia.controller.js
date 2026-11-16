@@ -37,3 +37,18 @@ export async function detalhar(req, res) {
   const ocorrencia = await ocorrenciaService.detalhar(req.usuario, req.params.id);
   res.json(serializarOcorrencia(ocorrencia));
 }
+
+export async function arquivar(req, res) {
+  const ocorrencia = await ocorrenciaService.arquivar(req.usuario, req.params.id, req.body.motivo);
+  res.json(serializarOcorrencia(ocorrencia));
+}
+
+export async function historicoAluno(req, res) {
+  const { aluno, itens, total, page, pageSize } = await ocorrenciaService.historicoAluno(req.usuario, req.params.id, req.query);
+  res.json({ aluno, itens: itens.map(serializarOcorrencia), total, page, pageSize });
+}
+
+export async function meuHistorico(req, res) {
+  const { aluno, itens, total, page, pageSize } = await ocorrenciaService.meuHistorico(req.usuario, req.query);
+  res.json({ aluno, itens: itens.map(serializarOcorrencia), total, page, pageSize });
+}
