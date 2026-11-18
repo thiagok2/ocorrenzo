@@ -1,6 +1,6 @@
 # Ocorrência+ — Backend
 
-API Node.js (Express, módulos ES) + PostgreSQL + Sequelize. Implementa o núcleo do sistema (R01 a R19 — ver `specs/Design.md` §3). O frontend ainda não existe; até aqui, tudo é testado pela API (`api.http`, Postman/curl) e pela suíte automatizada (`npm test`).
+API Node.js (Express, módulos ES) + PostgreSQL + Sequelize. Implementa o núcleo (R01 a R19) e o painel complementar (R20, R21) do sistema — ver `specs/Design.md` §3. O frontend consome esta API a partir de `frontend/`; a API continua testável isoladamente pelo `api.http` (Postman/curl) e pela suíte automatizada (`npm test`).
 
 ## Pré-requisitos
 
@@ -73,7 +73,7 @@ curl http://localhost:3333/api/health
 
 ## 6. Testar as rotas
 
-Com o servidor no ar, abra `api.http` (extensão REST Client do VS Code, ou equivalente no Postman/Insomnia/Thunder Client) e rode as requisições em ordem — o arquivo cobre as 19 rotas do núcleo (R01 a R19), caminho feliz e os erros esperados de cada uma.
+Com o servidor no ar, abra `api.http` (extensão REST Client do VS Code, ou equivalente no Postman/Insomnia/Thunder Client) e rode as requisições em ordem — o arquivo cobre as 21 rotas (R01 a R21), caminho feliz e os erros esperados de cada uma.
 
 ## 7. Rodar a suíte automatizada
 
@@ -81,7 +81,7 @@ Com o servidor no ar, abra `api.http` (extensão REST Client do VS Code, ou equi
 npm test
 ```
 
-Roda contra o banco `ocorrenzo_test` (passo 4 acima precisa já ter sido feito). Cobre as 5 propriedades de corretude do Design (P1 a P5 — imutabilidade, escopo por turma, turma preservada na transferência, arquivamento auditado, visão do aluno) mais os casos gerais de autenticação/validação. Pode ser rodada repetidamente sem resetar o banco — cada execução cria suas próprias turmas/alunos com nomes únicos.
+Roda contra o banco `ocorrenzo_test` (passo 4 acima precisa já ter sido feito). Cobre as 6 propriedades de corretude do Design (P1 a P5 — imutabilidade, escopo por turma, turma preservada na transferência, arquivamento auditado, visão do aluno — mais P6, o destaque recalculado do painel) mais os casos gerais de autenticação/validação. Pode ser rodada repetidamente sem resetar o banco — cada execução cria suas próprias turmas/alunos com nomes únicos.
 
 ## Estrutura
 

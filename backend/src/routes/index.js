@@ -3,6 +3,7 @@ import ocorrenciasRouter from './ocorrencias.routes.js';
 import alunosRouter from './alunos.routes.js';
 import turmasRouter from './turmas.routes.js';
 import professoresRouter from './professores.routes.js';
+import painelRouter from './painel.routes.js';
 import authRouter from './auth.routes.js';
 import autenticar from '../middlewares/autenticar.js';
 import autorizarPerfil from '../middlewares/autorizarPerfil.js';
@@ -30,6 +31,7 @@ router.use('/ocorrencias', ocorrenciasRouter); // R04 a R08 reais
 router.use('/alunos', alunosRouter); // R09, R12, R13, R15, R16 reais
 router.use('/turmas', turmasRouter); // R11, R14, R18, R19 reais
 router.use('/professores', professoresRouter); // R17 real
+router.use('/painel', painelRouter); // R20, R21 reais
 
 router.get(
   '/me/ocorrencias',

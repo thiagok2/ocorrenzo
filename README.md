@@ -8,6 +8,69 @@ Projeto da atividade de **3º bimestre** (3º ano do Ensino Médio), autores **E
 
 ---
 
+## Como executar o projeto
+
+### Pré-requisitos
+
+- Node.js 22 LTS (ou compatível)
+- PostgreSQL rodando localmente (ou acessível pela rede)
+
+### 1. Backend
+
+```bash
+cd backend
+npm install
+cp .env.example .env     # edite DB_HOST/DB_PORT/DB_USER/DB_PASS/JWT_SECRET conforme seu PostgreSQL
+
+createdb ocorrenzo        # banco de desenvolvimento (ajuste se DB_NAME for diferente no seu .env)
+
+npx sequelize-cli db:migrate
+npx sequelize-cli db:seed:all
+
+npm run dev                # API em http://localhost:3333/api
+```
+
+Detalhes completos (banco de teste, `api.http`, suíte automatizada, estrutura de pastas) estão em `backend/README.md`.
+
+### 2. Frontend
+
+Em outro terminal:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env       # VITE_API_URL já aponta para http://localhost:3333/api por padrão
+
+npm run dev                 # aplicação em http://localhost:5173
+```
+
+Confirme que o backend está no ar antes de abrir o frontend — a tela de login depende da API para autenticar.
+
+### Usuários de teste
+
+O seed de desenvolvimento (`backend/src/database/seeders/20261104090001-dev-turma-unica-e-pessoas.cjs`) cria 1 turma ("3º Ano") com todos os perfis já vinculados a ela. A senha de todo usuário **adulto** é `senha123`; a senha de cada **aluno** é a própria matrícula.
+
+| Perfil | Nome | Matrícula | Senha |
+| --- | --- | --- | --- |
+| coordenador | Marcio Roberio | `2026000001` | `senha123` |
+| professor | Thiago Oliveira | `2026000002` | `senha123` |
+| professor | Osvaldo Pife | `2026000003` | `senha123` |
+| professor | Marici Lopes | `2026000004` | `senha123` |
+| apoio_pedagogico | Fabricia | `2026000005` | `senha123` |
+| aluno (exemplo) | Alana Sofia Mendonça Ribeiro Trajano | `2024308532` | `2024308532` |
+
+## Roteiro de demonstração (≈5 minutos)
+
+Segue o Marco de Entrega do núcleo (`specs/Requirements.md` §11), já pela interface:
+
+1. **Login como professor** (`2026000002` / `senha123`) → cai em "Ocorrências".
+2. **Registrar uma ocorrência**: botão "Nova ocorrência" → escolher um aluno, tipo, gravidade e descrição → salvar. A ocorrência aparece no topo da lista.
+3. **Listar e filtrar**: trocar a aba (Ativas/Arquivadas/Todas) e aplicar um filtro de tipo ou gravidade.
+4. **Arquivar com motivo**: menu **⋮** da ocorrência recém-criada → Arquivar → informar o motivo. Abrir "Ver detalhes" e mostrar que a descrição original continua intacta junto do motivo e de quem arquivou.
+5. **Histórico do aluno**: ir em "Alunos" → selecionar o mesmo aluno → "Ver ficha completa" → mostrar o histórico dele, com a ocorrência recém-arquivada.
+6. **Sair e logar como aluno** (`2024308532` / `2024308532`) → "Meu histórico" mostra só as próprias ocorrências, sem nenhuma ação de registrar/arquivar.
+7. **Acesso negado**: logado como aluno, digitar `/ocorrencias` na barra de endereço (redireciona para fora); e, se houver uma segunda turma sem vínculo, mostrar que um professor sem vínculo recebe "Acesso restrito às turmas em que você leciona." ao tentar registrar nela.
+
 ## Estrutura do repositório
 
 ```
@@ -15,7 +78,7 @@ docs/      → metodologia de especificação (SDD) e o prompt que orienta a LLM
 specs/     → os artefatos da especificação deste projeto (briefing, requirements, design, tasks)
 history/   → diário de desenvolvimento, uma entrada por sessão de trabalho
 backend/   → API Node.js + Express (ESM), PostgreSQL + Sequelize (Design.md §3)
-frontend/  → aplicação React (ainda não iniciada — ver ordem de fases em specs/Task.md)
+frontend/  → aplicação React + Vite + Tailwind (Design.md §4), consome a API do backend/
 ```
 
 ## Metodologia
@@ -52,5 +115,6 @@ A implementação **não** é feita de forma autônoma pela LLM. O fluxo adotado
 ## Decisões técnicas já registradas
 
 - Backend em Node.js com módulos ES (`import`/`export`), não CommonJS — ver `history/20261019_setup_projeto.md`.
-- Stack planejada: Express + PostgreSQL + Sequelize no backend; React + Vite + Tailwind no frontend (`specs/Design.md` §3–4).
+- Stack: Express + PostgreSQL + Sequelize no backend; React + Vite + Tailwind (v4, via `@tailwindcss/vite`) no frontend (`specs/Design.md` §3–4).
 - Nenhuma ocorrência é editável ou excluível após o registro — apenas arquivável com motivo (`specs/Requirements.md` RN1, RNF1).
+- Alguns pontos do Design foram ajustados durante a implementação por limitação real do contrato das rotas (ex.: contagem das abas de situação só na aba selecionada; sem ordenação na lista de alunos) — ver `specs/Design.md` v3.3 no histórico de revisões e as entradas de `history/` de cada tarefa da Fase 2/3 para o porquê de cada ajuste.

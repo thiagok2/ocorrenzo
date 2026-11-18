@@ -460,3 +460,31 @@ Authorization: Bearer {{tokenProfessor}}
 Content-Type: application/json
 
 { "alunoId": "{{alunoTurmaNovaId}}", "tipo": "atraso", "gravidade": "leve", "descricao": "Vínculo habilitou na hora.", "data": "2026-06-10" }
+
+### R20 - painel por turma (padrão 30 dias) — 200
+GET {{base}}/painel/turmas
+Authorization: Bearer {{token}}
+
+### R20 - painel por turma (90 dias) — 200
+GET {{base}}/painel/turmas?periodoDias=90
+Authorization: Bearer {{token}}
+
+### R20 - periodoDias inválido — 400 VALIDACAO
+GET {{base}}/painel/turmas?periodoDias=45
+Authorization: Bearer {{token}}
+
+### R20 - professor sem acesso ao painel — 403
+GET {{base}}/painel/turmas
+Authorization: Bearer {{tokenProfessor}}
+
+### R21 - alunos em atenção (padrão 30 dias, todas as turmas) — 200
+GET {{base}}/painel/alunos-em-atencao
+Authorization: Bearer {{token}}
+
+### R21 - alunos em atenção filtrado por turma — 200
+GET {{base}}/painel/alunos-em-atencao?turmaId={{turmaNovaId}}&periodoDias=60
+Authorization: Bearer {{token}}
+
+### R21 - professor sem acesso ao painel — 403
+GET {{base}}/painel/alunos-em-atencao
+Authorization: Bearer {{tokenProfessor}}

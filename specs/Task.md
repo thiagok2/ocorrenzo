@@ -46,26 +46,26 @@
 
 ### FASE 2 — FRONTEND (React)
 
-- [ ] **2.1** Projeto React + Vite + Tailwind + Router + cliente HTTP — _P_
-- [ ] **2.2** Componentes base (`ui`) — _M_
-- [ ] **2.3** `AuthContext`, `ProtectedRoute` e **LoginPage** — _M_
-- [ ] **2.4** Layout: `AppHeader`, abas por perfil e mapa de rotas — _P/M_
-- [ ] **2.5** **OcorrenciasPage**: lista, abas de situação, filtros e paginação — _M/G_
-- [ ] **2.6** **RegistrarOcorrenciaDrawer** (registrar pela interface) — _M/G_
-- [ ] **2.7** Arquivar ocorrência e ver detalhes — _M_
-- [ ] **2.8** **AlunosPage** (painel lateral) e **FichaAlunoPage** — _M/G_
-- [ ] **2.9** **CadastrosPage**: turmas, alunos, vínculos e transferência — _M_
-- [ ] **2.10** **MeuHistoricoPage** (perfil aluno) — _P_
-- [ ] **2.11** Testes do frontend, roteiro ponta a ponta e ajustes — _M_
+- [x] **2.1** Projeto React + Vite + Tailwind + Router + cliente HTTP — _P_
+- [x] **2.2** Componentes base (`ui`) — _M_
+- [x] **2.3** `AuthContext`, `ProtectedRoute` e **LoginPage** — _M_
+- [x] **2.4** Layout: `AppHeader`, abas por perfil e mapa de rotas — _P/M_
+- [x] **2.5** **OcorrenciasPage**: lista, abas de situação, filtros e paginação — _M/G_
+- [x] **2.6** **RegistrarOcorrenciaDrawer** (registrar pela interface) — _M/G_
+- [x] **2.7** Arquivar ocorrência e ver detalhes — _M_
+- [x] **2.8** **AlunosPage** (painel lateral) e **FichaAlunoPage** — _M/G_
+- [x] **2.9** **CadastrosPage**: turmas, alunos, vínculos e transferência — _M_
+- [x] **2.10** **MeuHistoricoPage** (perfil aluno) — _P_
+- [x] **2.11** Testes do frontend, roteiro ponta a ponta e ajustes — _M_
 
 ### FASE 3 — COMPLEMENTAR (somente após a Tarefa 2.11)
 
-- [ ] **3.1** Backend do painel simples (R20, R21) — _M_
-- [ ] **3.2** Frontend: **PainelPage** — _M_
+- [x] **3.1** Backend do painel simples (R20, R21) — _M_
+- [x] **3.2** Frontend: **PainelPage** — _M_
 
 ### FASE 4 — FECHAMENTO
 
-- [ ] **4.1** README, roteiro de demonstração e revisão final dos 3 arquivos — _P/M_
+- [x] **4.1** README, roteiro de demonstração e revisão final dos 3 arquivos — _P/M_
 
 ### Mapa de dependências
 
@@ -565,6 +565,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 - [ ] Uma chamada de teste a `GET /api/health` funciona (CORS ok).
 - [ ] Os tokens de cor do Design estão disponíveis como classes.
 
+> Implementado e verificado com `npm run build`/`npm run lint` (sem erros); teste manual no navegador (com o backend no ar) ainda pendente — ver roteiro em `history/20261118_setup_frontend_tarefa_2.1.md`.
+
 ---
 
 ## Tarefa 2.2 — Componentes base (`components/ui`)
@@ -584,6 +586,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 
 - [ ] Todos os componentes renderizam os estados do Figma (inclusive badges de gravidade e situação com texto).
 - [ ] `Drawer` e `Dialog` fecham com `Esc` e prendem o foco.
+
+> Implementado; validado via vitrine temporária + `npm run build`/`lint`. Comparação pixel-a-pixel com o Figma e teste interativo de `Esc`/foco no navegador pendentes — ver `history/20261118_componentes_base_tarefa_2.2.md`.
 
 ---
 
@@ -606,6 +610,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 - [ ] Recarregar a página mantém a sessão; um token expirado leva ao login.
 - [ ] Acessar `/ocorrencias` sem login redireciona para `/login`.
 
+> Implementado; teste manual de login real contra o backend pendente — ver `history/20261118_auth_login_tarefa_2.3.md`.
+
 ---
 
 ## Tarefa 2.4 — Layout, abas por perfil e mapa de rotas
@@ -624,6 +630,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 
 - [ ] Cada perfil vê somente as suas abas; rotas de outro perfil redirecionam.
 - [ ] O header permanece visível ao rolar.
+
+> Implementado; teste manual com os 3 perfis pendente — ver `history/20261118_layout_header_tarefa_2.4.md`.
 
 ---
 
@@ -645,6 +653,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 - [ ] A lista mostra os dados reais da API; trocar aba, filtro ou página atualiza a URL e a lista.
 - [ ] Professor só vê turmas vinculadas (opções de turma vêm de `GET /turmas`).
 - [ ] O estado vazio e o de erro aparecem corretamente.
+
+> Implementado, incluindo um desvio de escopo deliberado (contagem nas abas só na aba ativa — R05 não dá os 3 totais numa chamada). Teste manual com dados reais pendente — ver `history/20261118_lista_ocorrencias_tarefa_2.5.md`.
 
 ---
 
@@ -669,6 +679,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 - [ ] Professor só encontra alunos das suas turmas no combobox.
 - [ ] Todas as validações funcionam; Esc/✕/Cancelar pedem confirmação quando há dados.
 
+> Implementado; teste manual do fluxo completo de registro pendente — ver `history/20261118_drawer_registrar_tarefa_2.6.md`.
+
 ---
 
 ## Tarefa 2.7 — Arquivar ocorrência e ver detalhes
@@ -687,6 +699,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 - [ ] Arquivar sem motivo é bloqueado; `409` e `403` mostram mensagem clara.
 - [ ] O detalhe de uma arquivada exibe o original **e** os dados do arquivamento.
 
+> Implementado; teste manual pendente — ver `history/20261118_arquivar_detalhes_tarefa_2.7.md`.
+
 ---
 
 ## Tarefa 2.8 — AlunosPage (painel lateral) e FichaAlunoPage
@@ -703,6 +717,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 
 - [ ] Selecionar um aluno atualiza o painel lateral com o resumo e as 3 últimas ocorrências.
 - [ ] A ficha mostra a turma **registrada** (e não a atual) em cada ocorrência de um aluno transferido.
+
+> Implementado, com um desvio de escopo deliberado ("Ordenar" do `FilterBar` não existe — `GET /alunos` não tem parâmetro de ordenação). Teste manual pendente — ver `history/20261118_alunos_ficha_tarefa_2.8.md`.
 
 ---
 
@@ -721,6 +737,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 - [ ] O coordenador cadastra turma, aluno, vincula professor e transfere aluno pela interface.
 - [ ] Professor e aluno não veem nem acessam a página.
 
+> Implementado; teste manual pendente — ver `history/20261118_cadastros_frontend_tarefa_2.9.md`.
+
 ---
 
 ## Tarefa 2.10 — MeuHistoricoPage (perfil aluno)
@@ -737,6 +755,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 - [ ] O aluno vê apenas o próprio histórico e nenhuma ação de registro ou arquivamento.
 - [ ] Digitar na URL a rota de outro perfil redireciona.
 
+> Implementado; teste manual pendente — ver `history/20261118_meu_historico_tarefa_2.10.md`.
+
 ---
 
 ## Tarefa 2.11 — Testes do frontend, roteiro ponta a ponta e ajustes
@@ -752,8 +772,10 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 
 **Pronto quando**
 
-- [ ] Testes passam; o roteiro completo funciona nos 3 perfis.
-- [ ] **O núcleo (Req. 1 a 6) está entregue.** A Fase 3 pode começar.
+- [x] Testes passam; o roteiro completo funciona nos 3 perfis.
+- [x] **O núcleo (Req. 1 a 6) está entregue.** A Fase 3 pode começar.
+
+> Passo 1 (testes automatizados) feito — `npm test` dentro de `frontend/` passa com 15/15. Passos 2 e 3 (roteiro manual do Marco de Entrega nos 3 perfis + revisão visual contra o Figma) **ainda não foram executados**: o usuário optou por liberar a Fase 3 agora e testar tudo de uma vez depois (2026-11-18: "VAMOS CONFIAR... VOU TESTAR TUDO DE UMA VEZ"). Ver `history/20261118_testes_frontend_tarefa_2.11.md`. Se o roteiro manual apontar algo quebrado, volta aqui antes de considerar o núcleo realmente pronto.
 
 ---
 
@@ -772,7 +794,9 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 
 **Pronto quando**
 
-- [ ] R20 e R21 funcionam no `api.http` e nos testes; professor e aluno recebem `403`.
+- [x] R20 e R21 funcionam no `api.http` e nos testes; professor e aluno recebem `403`.
+
+> Implementado e testado automaticamente (23/23 testes, `backend`). Restrito a coordenador **e** apoio_pedagogico (não só coordenador), conforme `Design.md` §3.2 — ver `history/20261118_painel_backend_tarefa_3.1.md`.
 
 ---
 
@@ -791,6 +815,8 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 - [ ] O painel exibe os dados reais, respeita o período e o acesso só do coordenador.
 - [ ] A tela inicial continua sendo **Ocorrências**.
 
+> Implementado; teste manual pendente (mesmo lote de testes combinados que o usuário vai rodar para a Fase 2) — ver `history/20261118_painel_frontend_tarefa_3.2.md`.
+
 ---
 
 # FASE 4 — FECHAMENTO
@@ -806,7 +832,9 @@ npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 **Pronto quando**
 
 - [ ] Outra pessoa consegue rodar o projeto só com o README.
-- [ ] Os 3 arquivos estão consistentes entre si (rotas, requisitos e tarefas).
+- [x] Os 3 arquivos estão consistentes entre si (rotas, requisitos e tarefas).
+
+> README da raiz reescrito com passo a passo de backend+frontend, usuários de teste e o roteiro de demonstração; `Design.md` subiu para v3.3 registrando os 2 ajustes feitos na implementação (contagem das abas, ordenação de alunos). Falta só alguém de fora rodar o projeto só com o README para fechar o primeiro item — ver `history/20261118_fechamento_tarefa_4.1.md`.
 
 ---
 

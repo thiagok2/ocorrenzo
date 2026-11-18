@@ -1,8 +1,8 @@
 # Design.md — Ocorrência+ (Módulo de Ocorrências Disciplinares)
 
-| **Versão**     | 3.2                                                                 |
+| **Versão**     | 3.3                                                                 |
 | -------------- | ------------------------------------------------------------------- |
-| **Data**       | 14/10/2026                                                          |
+| **Data**       | 18/11/2026                                                          |
 | **Autores**    | Enzo e Lucas Rafael                                                 |
 | **Baseado em** | `Requirements.md` v2.2 · Protótipo Figma "Ocorrência+"              |
 | **Atividade**  | 3º Bimestre — SPECS (Requirements · Design · Tasks)                 |
@@ -16,6 +16,7 @@
 | 3.0    | 08/10/2026 | **Reestruturação para a atividade do 3º bimestre**: começa pelo propósito principal; backend API (Node + Express + PostgreSQL + Sequelize) com rotas detalhadas e testáveis; componentes do frontend por página; itens do Figma fora do escopo removidos. |
 | 3.1    | 09/10/2026 | **Revisão de consistência**: trigger de `UPDATE` no banco (RNF1); escopo do professor nos contadores R12/R13 e no aluno transferido (R09); "Destaque positivo" fora do critério "em atenção" (R21); senha inicial = matrícula; limite de tentativas no login (`429`); versões de Node, Express, React e Tailwind atualizadas. |
 | 3.2    | 14/10/2026 | **Revisão final**: nome do arquivo padronizado (`Design.md`); removido ponto em aberto sobre dados do mock do Figma (não pertence à especificação). |
+| 3.3    | 18/11/2026 | **Ajustes encontrados na implementação da Fase 2/3** (Tasks 2.5, 2.8, 3.1): contagem das `SituacaoTabs` só na aba selecionada (R05 não devolve os 3 totais numa chamada); removida a ordenação opcional do `FilterBar` de `AlunosPage` (R12 não tem parâmetro de ordenação); R20/R21 confirmadas como coordenador **e** apoio_pedagogico (já estava assim em §3.2, só reforçado aqui). |
 
 ### Sumário
 
@@ -951,7 +952,7 @@ Layout _split screen_: painel esquerdo verde (marca) + painel direito com card d
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
 | `AppHeader`                 | Logo, abas por perfil, menu do usuário (avatar, nome, perfil, sair)                                                                                          | —                |
 | `PageHeader`                | Título "Ocorrências", subtítulo com total e botão **Nova ocorrência** (primário, abre o drawer)                                                              | —                |
-| `SituacaoTabs`              | Abas **Ativas · Arquivadas · Todas** (`SegmentedControl`) com contagem; padrão: Ativas                                                                       | R05              |
+| `SituacaoTabs`              | Abas **Ativas · Arquivadas · Todas** (`SegmentedControl`) com contagem **só na aba selecionada** (R05 devolve o `total` apenas da consulta atual, não os 3 ao mesmo tempo — v3.3); padrão: Ativas | R05              |
 | `FilterBar`                 | `SearchInput` (aluno: nome/matrícula) · `SelectFilter` Turma · Tipo · Gravidade · período (data inicial/final) · "Limpar filtros"                             | R05, R11         |
 | `OcorrenciasTable`          | Colunas: **ALUNO** (`Avatar` + nome + turma) · **OCORRÊNCIA** (tipo + descrição resumida) · **DATA** · **GRAVIDADE** (`GravidadeBadge`) · **SITUAÇÃO** (`SituacaoBadge`) · ações (`RowActionsMenu`) | R05 |
 | `RowActionsMenu`            | `⋮` com: **Ver detalhes** · **Arquivar** (oculto se já arquivada) · **Registrar correção** (abre o drawer com `referenciaId`)                                | —                |
@@ -985,7 +986,7 @@ Layout _split screen_: painel esquerdo verde (marca) + painel direito com card d
 | Componente             | Responsabilidade                                                                                                                                  | API            |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
 | `PageHeader`           | _Breadcrumb_ + título "Alunos – Turma {nome}" + resumo "N alunos"; botão **Novo aluno** (só coordenador)                                          | R12            |
-| `FilterBar`            | `SearchInput` (nome/matrícula) · `SelectFilter` Turma · Ordenar (Nome A–Z)                                                                        | R11, R12       |
+| `FilterBar`            | `SearchInput` (nome/matrícula) · `SelectFilter` Turma — ~~Ordenar (Nome A–Z)~~ removido na implementação: `GET /alunos` (R12) não tem parâmetro de ordenação, a lista já vem fixa por nome (v3.3) | R11, R12       |
 | `AlunosTable`          | Colunas: **ALUNO** (`Avatar` + nome) · **MATRÍCULA** · **OCORRÊNCIAS** (ativas) · **ÚLTIMA** (data ou `—`) · `⋮` (**Ver ficha** · **Registrar ocorrência** · **Transferir de turma** — só coordenador) | R12 |
 | `AlunoResumoPanel`     | Painel lateral do aluno selecionado: `Avatar`, nome, "Matrícula · Turma"; 3 `StatTile` (**Ocorrências ativas** · **Graves** · **Arquivadas**); `HistoricoRecente` (últimas 3: ponto de gravidade, tipo, data · gravidade · situação); botões **Registrar ocorrência** e **Ver ficha completa** | R13, R09 (`pageSize=3`) |
 | `Pagination`           | "Exibindo X de N alunos"                                                                                                                          | R12            |
